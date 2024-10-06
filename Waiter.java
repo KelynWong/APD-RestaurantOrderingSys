@@ -23,5 +23,19 @@ public class Waiter implements Runnable {
 
         // Submit the order to the kitchen
         kitchen.processOrder(order);
+        while (true) {
+            if (kitchen.isOrderComplete(order)) {  // Check without synchronization
+                System.out.println("Order complete! Waiter is done.");
+                break;
+            }
+
+            // Simulate some delay or waiting period
+            try {
+                Thread.sleep(100);  // Waiter keeps checking the kitchen every 100ms
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
     }
 }

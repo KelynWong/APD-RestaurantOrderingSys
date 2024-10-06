@@ -49,36 +49,77 @@ public class Chef implements Runnable {  // Runnable to allow multithreading
 
     @Override
     public void run() {
+        // while (true) {
+        //     Dish dish = kitchen.getDishToMake();  // Get a dish to prepare
+        //     if (dish == null) {
+        //         System.out.println("No more dishes to make, Chef is done.");
+        //         break;
+        //     }
+
+        //     System.out.println("Chef is preparing: " + dish.getClass().getSimpleName());
+        //     boolean allIngredientsAvailable = true;  // Track if all ingredients can be added
+            
+        //     for (String ingredient : dish.getIngredients().keySet()) {
+        //         while (dish.getIngredients().get(ingredient) == 0) {  // While ingredient is not prepared
+        //             if (inventory.useIngredient(ingredient)) {
+        //                 dish.addIngredient(ingredient);  // Add ingredient to the dish
+        //                 System.out.println("Added " + ingredient + " to " + dish.getClass().getSimpleName());
+        //             } else {
+        //                 System.out.println("Insufficient " + ingredient + " for " + dish.getClass().getSimpleName());
+        //                 allIngredientsAvailable = false; // Track if we can't finish the dish
+        //                 break; // Exit the while loop for this ingredient
+        //             }
+        //         }
+        //         if (!allIngredientsAvailable) {
+        //             break; // Exit the for loop if an ingredient is missing
+        //         }
+        //     }
+
+        //     // If all ingredients are available, mark the dish as Made
+        //     if (allIngredientsAvailable && dish.getState().equals("toMake")) {
+        //         System.out.println(dish.getClass().getSimpleName() + " is ready!");
+        //         kitchen.markDishAsMade(dish);
+        //     }
+        // }
         while (true) {
-            Dish dish = kitchen.getDishToMake();  // Get a dish to prepare
-            if (dish == null) {
-                System.out.println("No more dishes to make, Chef is done.");
+            Dish dish = kitchen.getDishToMake();  // Get a dish to prepare without synchronization
+            if (dish == null && kitchen.noMoreDishesToMake()) {
+                System.out.println("No more dishes to make. Chef is done.");
                 break;
             }
 
-            System.out.println("Chef is preparing: " + dish.getClass().getSimpleName());
-            boolean allIngredientsAvailable = true;  // Track if all ingredients can be added
-            
-            for (String ingredient : dish.getIngredients().keySet()) {
-                while (dish.getIngredients().get(ingredient) == 0) {  // While ingredient is not prepared
-                    if (inventory.useIngredient(ingredient)) {
-                        dish.addIngredient(ingredient);  // Add ingredient to the dish
-                        System.out.println("Added " + ingredient + " to " + dish.getClass().getSimpleName());
-                    } else {
-                        System.out.println("Insufficient " + ingredient + " for " + dish.getClass().getSimpleName());
-                        allIngredientsAvailable = false; // Track if we can't finish the dish
-                        break; // Exit the while loop for this ingredient
+            if (dish != null) {
+                System.out.println("Chef is preparing: " + dish.getClass().getSimpleName());
+                boolean allIngredientsAvailable = true;
+
+                for (String ingredient : dish.getIngredients().keySet()) {
+                    while (dish.getIngredients().get(ingredient) == 0) {  // While ingredient is not prepared
+                        if (inventory.useIngredient(ingredient)) {
+                            dish.addIngredient(ingredient);  // Add ingredient to the dish
+                            System.out.println("Added " + ingredient + " to " + dish.getClass().getSimpleName());
+                        } else {
+                            System.out.println("Insufficient " + ingredient + " for " + dish.getClass().getSimpleName());
+                            allIngredientsAvailable = false;
+                            break;
+                        }
+                    }
+                    if (!allIngredientsAvailable) {
+                        break;
                     }
                 }
-                if (!allIngredientsAvailable) {
-                    break; // Exit the for loop if an ingredient is missing
+
+                if (allIngredientsAvailable && dish.getState().equals("toMake")) {
+                    System.out.println(dish.getClass().getSimpleName() + " is ready!");
+                    kitchen.markDishAsMade(dish);  // Mark dish as made without synchronization
                 }
             }
 
-            // If all ingredients are available, mark the dish as Made
-            if (allIngredientsAvailable && dish.getState().equals("toMake")) {
-                System.out.println(dish.getClass().getSimpleName() + " is ready!");
-                kitchen.markDishAsMade(dish);
+            // Simulate some delay or waiting period
+            try {
+                Thread.sleep(100);  // Chef keeps checking the kitchen every 100ms
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
             }
         }
     }
