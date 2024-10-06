@@ -16,14 +16,11 @@ public class RestaurantMain {
             inventory.addIngredient("salt", 1);
         }
 
-        
-
         // Add dishes to the kitchen - init kitchen
         for (int i = 0; i < 100; i++){
             kitchen.addDish(new SteamedEgg());
             kitchen.addDish(new Omelette());
         }
-        
 
         // Display the initial inventory
         inventory.displayInventory();
@@ -40,21 +37,15 @@ public class RestaurantMain {
 
         // Properly shut down the ExecutorService
         executorService.shutdown();
-         try {
-            // Wait for all tasks to finish or time out after 1 minute
-            if (!executorService.awaitTermination(1, TimeUnit.MINUTES)) {
-                executorService.shutdownNow(); // Force shutdown if not finished
-            }
+
+        try {
+            // Wait indefinitely until all tasks are finished
+            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
         } catch (InterruptedException e) {
-            executorService.shutdownNow();
+            Thread.currentThread().interrupt(); // Restore interrupted status
         }
 
-       
-
-        // Display the final inventory
+        // Display the final inventory after all chef threads have finished
         inventory.displayInventory();
-        
-
-    
     }
 }
