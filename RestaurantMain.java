@@ -8,7 +8,7 @@ public class RestaurantMain {
         Inventory inventory = new Inventory();
 
         // Add some ingredients to the inventory - init inventory
-        for (int i = 0; i < 2000; i++){
+        for (int i = 0; i < 200; i++){
             inventory.addIngredient("egg", 1);
             inventory.addIngredient("milk", 1);
             inventory.addIngredient("butter", 1);
@@ -19,7 +19,7 @@ public class RestaurantMain {
         
 
         // Add dishes to the kitchen - init kitchen
-        for (int i = 0; i < 1000; i++){
+        for (int i = 0; i < 100; i++){
             kitchen.addDish(new SteamedEgg());
             kitchen.addDish(new Omelette());
         }
@@ -27,6 +27,7 @@ public class RestaurantMain {
 
         // Display the initial inventory
         inventory.displayInventory();
+       
         // Create a fixed thread pool using the Executor Framework
         int numberOfChefs = 10;  // For example, we want 2 chef threads
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfChefs);
@@ -48,16 +49,12 @@ public class RestaurantMain {
             executorService.shutdownNow();
         }
 
-        // while (!executorService.isTerminated()) 
-
-        // Create and start the Chef (in a separate thread)
-        // Chef chef = new Chef(kitchen, inventory);
-        // Thread chefThread = new Thread(chef);
-        // chefThread.start();
-
-        // Wait for the chef to finish
+       
 
         // Display the final inventory
         inventory.displayInventory();
+        
+
+    
     }
 }

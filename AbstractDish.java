@@ -20,7 +20,8 @@ public abstract class AbstractDish implements Dish {
         if (ingredients.containsKey(ingredient)) {
             // ingredients.put(ingredient, 1);  // Set ingredient to 1 (prepared)
             int count = ingredients.get(ingredient);
-            ingredients.put(ingredient, count++);
+            count++;
+            ingredients.put(ingredient, count);
         }
         checkIfMade();  // Check if all ingredients are prepared
     }

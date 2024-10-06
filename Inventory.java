@@ -22,13 +22,16 @@ public class Inventory {
     // potential race condition here
     public boolean useIngredient(String ingredient) {
         if (hasIngredient(ingredient)) {
+            
+            int count = stock.get(ingredient);
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             }
             catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            stock.put(ingredient, stock.get(ingredient) - 1);  // Decrease the stock by 1
+            count--;
+            stock.put(ingredient, count);  // Decrease the stock by 1
             return true;
         } else {
             return false;  // Ingredient not available
