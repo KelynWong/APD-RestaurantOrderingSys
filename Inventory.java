@@ -19,8 +19,15 @@ public class Inventory {
     }
 
     // Use an ingredient from the inventory (if available)
+    // potential race condition here
     public boolean useIngredient(String ingredient) {
         if (hasIngredient(ingredient)) {
+            try {
+                Thread.sleep(1000);
+            }
+            catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
             stock.put(ingredient, stock.get(ingredient) - 1);  // Decrease the stock by 1
             return true;
         } else {

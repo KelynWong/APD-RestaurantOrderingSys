@@ -7,5 +7,4 @@ public class SteamedEgg extends AbstractDish {
         ingredients.put("salt", 0);
     }
 
-    // You can add more specific logic here if needed
 }
