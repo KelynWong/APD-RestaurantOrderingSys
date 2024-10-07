@@ -1,9 +1,11 @@
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractDish implements Dish {
     protected Map<String, Integer> ingredients;
     protected String state = "toMake";  // Initial state is "toMake"
+    private AtomicInteger timesPicked = new AtomicInteger(0);  // Track how many chefs pick the dish
 
     public AbstractDish() {
         ingredients = new HashMap<>();
@@ -32,6 +34,14 @@ public abstract class AbstractDish implements Dish {
         if (allIngredientsPrepared) {
             state = "Made";  // Change state to Made
         }
+    }
+
+    public int incrementTimesPicked() {
+        return timesPicked.incrementAndGet();
+    }
+
+    public int getTimesPicked() {
+        return timesPicked.get();
     }
 
     @Override
