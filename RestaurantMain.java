@@ -8,18 +8,18 @@ public class RestaurantMain {
         Inventory inventory = new Inventory();
 
         // Add some ingredients to the inventory
-        inventory.addIngredient("egg", 5000);
-        inventory.addIngredient("milk", 3000);
-        inventory.addIngredient("butter", 2000);
-        inventory.addIngredient("water", 2000);
-        inventory.addIngredient("salt", 2000);
+        inventory.addIngredient("egg", 100);
+        inventory.addIngredient("milk", 100);
+        inventory.addIngredient("butter", 100);
+        inventory.addIngredient("water", 100);
+        inventory.addIngredient("salt", 100);
 
         // Create a fixed thread pool for waiters
-        int numberOfWaiters = 5;
+        int numberOfWaiters = 1;
         ExecutorService waiterExecutor = Executors.newFixedThreadPool(numberOfWaiters);
 
         // Create a fixed thread pool for chefs
-        int numberOfChefs = 5;
+        int numberOfChefs = 2;
         ExecutorService chefExecutor = Executors.newFixedThreadPool(numberOfChefs);
 
         // Submit Waiter tasks to the executor
@@ -29,23 +29,35 @@ public class RestaurantMain {
         }
 
         // Submit Chef tasks to the executor
-        for (int i = 0; i < numberOfChefs; i++) {
+        for (int i = 0; numberOfChefs > i; i++) {
             chefExecutor.submit(new Chef(kitchen, inventory));
         }
 
-        // Properly shut down the executors
+        // Properly shut down the executors after tasks are submitted
         waiterExecutor.shutdown();
         chefExecutor.shutdown();
 
         try {
-            waiterExecutor.awaitTermination(10, TimeUnit.SECONDS);
-            chefExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            // Wait for all waiter tasks to complete
+            waiterExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+
+            // Wait for all chef tasks to complete
+            chefExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+
+            System.out.println("All tasks have completed.");
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            Thread.currentThread().interrupt(); // Reset the interrupted status
         }
 
         // Display final kitchen state (optional)
-        kitchen.displayToMakeDishes();
-        kitchen.displayMadeDishes();
+        if (chefExecutor.isTerminated()) {
+            System.out.println("Chefs have completed their tasks. Inventory is final.");
+            // Display the final inventory
+            inventory.displayInventory();
+            // Display final kitchen state (optional)
+            kitchen.printDishes();
+        } else {
+            System.out.println("Not all chefs have completed their tasks. Inventory might not be final.");
+        }
     }
 }
