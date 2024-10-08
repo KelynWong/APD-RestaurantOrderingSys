@@ -4,6 +4,7 @@ public class Chef implements Runnable {
     private Kitchen kitchen;
     private Inventory inventory;
     private static final int MAX_ATTEMPTS = 5;
+    private static final int MAX_EMPTY_CHECKS = 5;  // Maximum consecutive empty checks before termination
     private static AtomicInteger activeChefsCount = new AtomicInteger(0);
 
     public Chef(Kitchen kitchen, Inventory inventory) {
@@ -14,18 +15,29 @@ public class Chef implements Runnable {
     @Override
     public void run() {
         activeChefsCount.incrementAndGet();
+        int emptyCheckCount = 0;  // Counter to track how many times there were no dishes
+
         while (true) {
-            Dish dish = kitchen.getDishToMake();  // Race condition occurs here
+            Dish dish = kitchen.getDishToMake();
+            
+            // If no dish is available, wait for a short time and check again
             if (dish == null) {
-                if (kitchen.noMoreDishesToMake()) {
-                    System.out.println(Thread.currentThread().getName() + " is done.");
+                emptyCheckCount++;
+                if (emptyCheckCount >= MAX_EMPTY_CHECKS) {
+                    System.out.println(Thread.currentThread().getName() + " has waited " + MAX_EMPTY_CHECKS + " times without receiving a dish. Chef is terminating.");
+                    break;
+                }
+                try {
+                    Thread.sleep(1000);  // Wait for 1 second before checking again
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();  // Handle thread interruption
                     break;
                 }
                 continue;
             }
 
-            // Log when the dish is picked, showing how many chefs have picked it
-            // int timesPicked = dish.incrementTimesPicked();
+            emptyCheckCount = 0;  // Reset empty check counter if a dish is found
+
             System.out.println(Thread.currentThread().getName() + " is preparing: " + dish.getClass().getSimpleName() + " (picked item: " + dish.hashCode() + ")");
 
             boolean prepared = false;
@@ -45,20 +57,9 @@ public class Chef implements Runnable {
                 kitchen.markDishAsAbandoned(dish);
             }
         }
-        activeChefsCount.decrementAndGet();
-    }
 
-    private boolean tryPrepareDish(Dish dish) {
-        for (String ingredient : dish.getIngredients().keySet()) {
-            if (dish.getIngredients().get(ingredient) == 0) {
-                if (!inventory.useIngredient(ingredient)) {
-                    return false;
-                }
-                dish.addIngredient(ingredient);
-                System.out.println(Thread.currentThread().getName() + " added " + ingredient + " to " + dish.getClass().getSimpleName());
-            }
-        }
-        return true;
+        activeChefsCount.decrementAndGet();
+        System.out.println(Thread.currentThread().getName() + " has finished.");
     }
 
     public static boolean areAllChefsDone() {

@@ -15,78 +15,52 @@ public class RestaurantMain {
             inventory.addIngredient("water", 15);
             inventory.addIngredient("salt", 30);
         }
-        
+
         int numberOfChefs = 10;
         int numberOfWaiters = 5;
 
-        // Create executor for waiters
-        ExecutorService waiterExecutor = Executors.newFixedThreadPool(numberOfWaiters);
+        // Create a shared executor for both waiters and chefs to run simultaneously
+        ExecutorService sharedExecutor = Executors.newFixedThreadPool(numberOfChefs + numberOfWaiters);
 
         // Waiters submitting orders
-        System.out.println("Waiters are submitting orders...");
+        System.out.println("Waiters and Chefs are starting concurrently...");
         for (int i = 0; i < numberOfWaiters; i++) {
-            waiterExecutor.submit(new Waiter(i + 1, kitchen));
+            sharedExecutor.submit(new Waiter(i + 1, kitchen));
         }
-
-        // Shutdown the waiter executor and wait for all orders to be submitted
-        waiterExecutor.shutdown();
-        try {
-            waiterExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        // Display initial kitchen state
-        System.out.println("\n--------------------------------");
-        System.out.println("Initial kitchen state:");
-        System.out.println("--------------------------------");
-        kitchen.displayAllDishesCount();
-        System.out.println("Total dishes (expected): 150");
-        kitchen.displayToMakeDishes();
-        System.out.println("Dishes to make (expected): 150");
-        System.out.println(" - SteamedEgg: 75");
-        System.out.println(" - Omelette: 75");
-        System.out.println();
-
-        // Now, start the chefs
-        System.out.println("Chefs are starting to cook...\n");
-        ExecutorService chefExecutor = Executors.newFixedThreadPool(numberOfChefs);
 
         // Submit Chef tasks to the executor
         for (int i = 0; i < numberOfChefs; i++) {
-            chefExecutor.submit(new Chef(kitchen, inventory));
+            sharedExecutor.submit(new Chef(kitchen, inventory));
         }
 
-        chefExecutor.shutdown();
-
+        // Shutdown the shared executor and wait for all tasks to finish
+        sharedExecutor.shutdown();
         try {
-            while (!chefExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS)) {
-                if (Chef.areAllChefsDone()) {
-                    break;
-                }
-            }
+            sharedExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
         // Display final kitchen state and inventory
-        System.out.println("\n--------------------------------");
-        System.out.println("Final kitchen state");
-        System.out.println("--------------------------------");
-        kitchen.displayAllDishesCount();
-        System.out.println("Total dishes (expected): 150");
-        kitchen.displayToMakeDishes();
-        System.out.println("Dishes to make (expected): 0");
-        kitchen.displayMadeDishes();
-        System.out.println("Made dishes (expected): 150");
-        System.out.println(" - SteamedEgg: 75");
-        System.out.println(" - Omelette: 75");
-        kitchen.displayAbandonedDishes();
-        System.out.println("Abandoned dishes (expected): 0");
-        System.out.println("\n--------------------------------");
-        System.out.println("Final inventory state");
-        System.out.println("--------------------------------");
-        inventory.displayInventory();
-        System.out.println("Expected Inventory: {butter=0, salt=0, egg=0, milk=0, water=0}");
+        if (sharedExecutor.isTerminated()){
+            System.out.println("\n--------------------------------");
+            System.out.println("Final kitchen state");
+            System.out.println("--------------------------------");
+            kitchen.displayAllDishesCount();
+            System.out.println("Total dishes (expected): 150");
+            kitchen.displayToMakeDishes();
+            System.out.println("Dishes to make (expected): 0");
+            kitchen.displayMadeDishes();
+            System.out.println("Made dishes (expected): 150");
+            System.out.println(" - SteamedEgg: 75");
+            System.out.println(" - Omelette: 75");
+            kitchen.displayAbandonedDishes();
+            System.out.println("Abandoned dishes (expected): 0");
+            System.out.println("\n--------------------------------");
+            System.out.println("Final inventory state");
+            System.out.println("--------------------------------");
+            inventory.displayInventory();
+            System.out.println("Expected Inventory: {butter=0, salt=0, egg=0, milk=0, water=0}");
+        }
     }
 }
