@@ -42,7 +42,7 @@ class Inventory {
         if (hasIngredient(ingredient)) {
             int count = stock.get(ingredient);
             try {
-                Thread.sleep(random.nextInt(100));  // Simulate random delays
+                Thread.sleep(random.nextInt(10));  // Simulate random delays
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

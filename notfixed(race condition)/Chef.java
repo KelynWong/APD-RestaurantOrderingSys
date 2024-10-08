@@ -25,8 +25,8 @@ public class Chef implements Runnable {
             }
 
             // Log when the dish is picked, showing how many chefs have picked it
-            int timesPicked = dish.incrementTimesPicked();
-            System.out.println(Thread.currentThread().getName() + " is preparing: " + dish.getClass().getSimpleName() + " (picked " + timesPicked + " times)");
+            // int timesPicked = dish.incrementTimesPicked();
+            System.out.println(Thread.currentThread().getName() + " is preparing: " + dish.getClass().getSimpleName() + " (picked item: " + dish.hashCode() + ")");
 
             boolean prepared = false;
             for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {

@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class Kitchen {
@@ -68,12 +70,46 @@ class Kitchen {
         System.out.println("Total dishes count: " + totalDishesCount.get());
     }
 
+    // Display dish types and their counts for dishes to make
     public void displayToMakeDishes() {
         System.out.println("Dishes to make: " + dishesToMake.size());
+
+        // Create a map to count the occurrences of each dish type
+        Map<String, Integer> dishCountMap = new HashMap<>();
+        for (Dish dish : dishesToMake) {
+            if (dish != null) { // Check if the dish is not null
+                String dishType = dish.getClass().getSimpleName();
+                dishCountMap.put(dishType, dishCountMap.getOrDefault(dishType, 0) + 1);
+            } else {
+                System.out.println(" - Skipping null dish entry");
+            }
+        }
+
+        // Print the count for each dish type
+        for (Map.Entry<String, Integer> entry : dishCountMap.entrySet()) {
+            System.out.println(" - " + entry.getKey() + ": " + entry.getValue());
+        }
     }
 
+    // Display dish types and their counts for made dishes
     public void displayMadeDishes() {
         System.out.println("Made dishes: " + madeDishes.size());
+
+        // Create a map to count the occurrences of each dish type
+        Map<String, Integer> dishCountMap = new HashMap<>();
+        for (Dish dish : madeDishes) {
+            if (dish != null) { // Check if the dish is not null
+                String dishType = dish.getClass().getSimpleName();
+                dishCountMap.put(dishType, dishCountMap.getOrDefault(dishType, 0) + 1);
+            } else {
+                System.out.println(" - Skipping null dish entry");
+            }
+        }
+
+        // Print the count for each dish type
+        for (Map.Entry<String, Integer> entry : dishCountMap.entrySet()) {
+            System.out.println(" - " + entry.getKey() + ": " + entry.getValue());
+        }
     }
 
     public void displayAbandonedDishes() {

@@ -31,7 +31,7 @@ public class RestaurantMain {
         // Shutdown the waiter executor and wait for all orders to be submitted
         waiterExecutor.shutdown();
         try {
-            waiterExecutor.awaitTermination(10, TimeUnit.SECONDS);
+            waiterExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -44,6 +44,8 @@ public class RestaurantMain {
         System.out.println("Total dishes (expected): 150");
         kitchen.displayToMakeDishes();
         System.out.println("Dishes to make (expected): 150");
+        System.out.println(" - SteamedEgg: 75");
+        System.out.println(" - Omelette: 75");
         System.out.println();
 
         // Now, start the chefs
@@ -58,7 +60,7 @@ public class RestaurantMain {
         chefExecutor.shutdown();
 
         try {
-            while (!chefExecutor.awaitTermination(1, TimeUnit.SECONDS)) {
+            while (!chefExecutor.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS)) {
                 if (Chef.areAllChefsDone()) {
                     break;
                 }
@@ -77,6 +79,8 @@ public class RestaurantMain {
         System.out.println("Dishes to make (expected): 0");
         kitchen.displayMadeDishes();
         System.out.println("Made dishes (expected): 150");
+        System.out.println(" - SteamedEgg: 75");
+        System.out.println(" - Omelette: 75");
         kitchen.displayAbandonedDishes();
         System.out.println("Abandoned dishes (expected): 0");
         System.out.println("\n--------------------------------");
