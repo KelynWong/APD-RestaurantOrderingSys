@@ -28,9 +28,9 @@ public class RestaurantMain {
             sharedExecutor.submit(new Waiter(i + 1, kitchen));
         }
 
-        // Submit Chef tasks to the executor
+        // Submit Chef tasks to the executor with chefId
         for (int i = 0; i < numberOfChefs; i++) {
-            sharedExecutor.submit(new Chef(kitchen, inventory));
+            sharedExecutor.submit(new Chef(i + 1, kitchen, inventory));  // Pass i+1 as chefId
         }
 
         // Shutdown the shared executor and wait for all tasks to finish
@@ -42,7 +42,7 @@ public class RestaurantMain {
         }
 
         // Display final kitchen state and inventory
-        if (sharedExecutor.isTerminated()){
+        if (sharedExecutor.isTerminated()) {
             System.out.println("\n--------------------------------");
             System.out.println("Final kitchen state");
             System.out.println("--------------------------------");
