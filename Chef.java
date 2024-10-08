@@ -38,14 +38,14 @@ public class Chef implements Runnable {  // Runnable to allow multithreading
             // Prepare the dish once available
             if (dish != null) {
                 isProcessingOrder = true;  // Set flag to true when processing an order
-                System.out.println(Thread.currentThread().getName() + " is preparing: " + dish.getClass().getSimpleName());
+                System.out.println(Thread.currentThread().getName() + " is preparing: " + dish.hashCode());
                 boolean allIngredientsAvailable = true;  // Track if all ingredients can be added
                 
                 for (String ingredient : dish.getIngredients().keySet()) {
                     while (dish.getIngredients().get(ingredient) == 0) {  // While ingredient is not prepared
                         if (inventory.useIngredient(ingredient)) {
                             dish.addIngredient(ingredient);  // Add ingredient to the dish
-                            System.out.println(Thread.currentThread().getName() + " Added " + ingredient + " to " + dish.getClass().getSimpleName());
+                            System.out.println(Thread.currentThread().getName() + " Added " + ingredient + " to " + dish.hashCode());
                         } else {
                             allIngredientsAvailable = false;
                             break;  // Break if ingredient is not available
@@ -59,7 +59,7 @@ public class Chef implements Runnable {  // Runnable to allow multithreading
 
                 // If all ingredients are available, mark the dish as Made
                 if (allIngredientsAvailable && dish.getState().equals("Made")) {
-                    System.out.println(dish.getClass().getSimpleName() + " is ready by " + Thread.currentThread().getName() + "!");
+                    System.out.println(dish.hashCode() + " is ready by " + Thread.currentThread().getName() + "!");
                     kitchen.markDishAsMade(dish);
                 } else {
                     System.out.println(dish.getClass().getSimpleName() + " by " + Thread.currentThread().getName() + " is not ready. ");
