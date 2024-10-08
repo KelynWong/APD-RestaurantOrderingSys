@@ -30,7 +30,7 @@ public class Chef implements Runnable {
 
             boolean prepared = false;
             for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-                if (tryPrepareDish(dish)) {
+                if (inventory.useIngredientsForDish(dish)) {
                     prepared = true;
                     break;
                 }

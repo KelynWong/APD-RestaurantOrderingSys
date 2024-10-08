@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -18,16 +20,33 @@ class Inventory {
         return stock.getOrDefault(ingredient, 0) > 0;
     }
 
-    // Potential race condition here when multiple chefs try to use the same ingredient concurrently
+    public boolean useIngredientsForDish(Dish dish) {
+        boolean success = true;
+
+        // Get ingredients needed for the dish
+        var ingredients = new ArrayList<>(dish.getIngredients().keySet());
+        // Collections.shuffle(ingredients);  // Randomize the order
+
+        // Try to use the ingredients
+        for (String ingredient : ingredients) {
+            if (!useIngredient(ingredient)) {
+                success = false;
+                break;
+            }
+        }
+
+        return success;
+    }
+
     public boolean useIngredient(String ingredient) {
         if (hasIngredient(ingredient)) {
             int count = stock.get(ingredient);
             try {
-                Thread.sleep(random.nextInt(50));  // Simulate random delays
+                Thread.sleep(random.nextInt(100));  // Simulate random delays
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            count--;  // Decrement the stock count (potential race condition)
+            count--;  // Decrement the stock count
             stock.put(ingredient, count);
             return true;
         } else {
