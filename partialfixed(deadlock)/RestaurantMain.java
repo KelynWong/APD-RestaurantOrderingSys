@@ -22,7 +22,7 @@ public class RestaurantMain {
         // Create a shared executor for both waiters and chefs to run simultaneously
         ExecutorService sharedExecutor = Executors.newFixedThreadPool(numberOfChefs + numberOfWaiters);
 
-        // Waiters submitting orders
+        // Waiters submitting orders and serving dishes
         System.out.println("Waiters and Chefs are starting concurrently...");
         for (int i = 0; i < numberOfWaiters; i++) {
             sharedExecutor.submit(new Waiter(i + 1, kitchen));
@@ -46,19 +46,7 @@ public class RestaurantMain {
             System.out.println("\n--------------------------------");
             System.out.println("Final kitchen state");
             System.out.println("--------------------------------");
-            kitchen.displayAllDishesCount();
-            System.out.println("Total dishes (expected): 150");
-            kitchen.displayToMakeDishes();
-            System.out.println("Dishes to make (expected): 0");
-            kitchen.displayMadeDishes();
-            System.out.println("Made dishes (expected): 150");
-            System.out.println(" - SteamedEgg: 75");
-            System.out.println(" - Omelette: 75");
-            kitchen.displayAbandonedDishes();
-            System.out.println("Abandoned dishes (expected): 0");
-            System.out.println("\n--------------------------------");
-            System.out.println("Final inventory state");
-            System.out.println("--------------------------------");
+            kitchen.displayDishHistory();
             inventory.displayInventory();
             System.out.println("Expected Inventory: {butter=0, salt=0, egg=0, milk=0, water=0}");
         }
