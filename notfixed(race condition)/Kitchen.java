@@ -1,23 +1,39 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class Kitchen {
     private List<Dish> dishesToMake;  
     private List<Dish> madeDishes;
     private List<Dish> abandonedDishes;
+    private List<Dish> servedDishes;
+    
     private AtomicInteger totalDishesCount;
+    private AtomicInteger totalAbandonedDishesCount;  
+
+    private Map<String, AtomicInteger> toMakeDishCountMap;
+    private Map<String, AtomicInteger> madeDishCountMap;
+    private Map<String, AtomicInteger> servedDishCountMap;
+    private Map<String, AtomicInteger> abandonedDishCountMap;
+    
+    // Set of all dish types
+    private Set<String> allDishTypes;
 
     public Kitchen() {
         dishesToMake = new ArrayList<>();
         madeDishes = new ArrayList<>();
         abandonedDishes = new ArrayList<>();
+        servedDishes = new ArrayList<>();
         totalDishesCount = new AtomicInteger(0);
+        totalAbandonedDishesCount = new AtomicInteger(0);
+
+        toMakeDishCountMap = new HashMap<>();
+        madeDishCountMap = new HashMap<>();
+        servedDishCountMap = new HashMap<>();
+        abandonedDishCountMap = new HashMap<>();
+        
+        allDishTypes = new HashSet<>();  // To track all possible dish types
     }
 
-    // Adding dishes introduces a race condition
     public void addDishToMake(Dish dish) {
         try {
             Thread.sleep(100);  // Artificial delay to exacerbate the race condition
@@ -25,26 +41,27 @@ class Kitchen {
             Thread.currentThread().interrupt();
         }
 
-        dishesToMake.add(dish);  // Race condition: multiple waiters adding dishes concurrently
+        dishesToMake.add(dish);  
         totalDishesCount.incrementAndGet();
+
+        incrementDishCount(dish, toMakeDishCountMap);
+        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
     }
 
-    // Retrieving a dish to make also introduces a race condition
     public Dish getDishToMake() {
         if (dishesToMake.isEmpty()) {
             return null;
         }
 
-        Dish dish = dishesToMake.get(0);  // Get but don't remove the dish yet (potential issue)
+        Dish dish = dishesToMake.get(0);  
         try {
-            Thread.sleep(200);  // Artificial delay to simulate chefs racing to pick the same dish
+            Thread.sleep(200);  
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 
-        // Check if dish still exists (race condition between different chefs)
         if (!dishesToMake.isEmpty() && dishesToMake.get(0).equals(dish)) {
-            dishesToMake.remove(0);  // Remove dish after delay, another chef might have taken it already
+            dishesToMake.remove(0);  
             return dish;
         }
         return null;
@@ -53,66 +70,70 @@ class Kitchen {
     public void markDishAsMade(Dish dish) {
         synchronized (madeDishes) {
             madeDishes.add(dish);
+            incrementDishCount(dish, madeDishCountMap);
+            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
         }
     }
 
     public void markDishAsAbandoned(Dish dish) {
         synchronized (abandonedDishes) {
             abandonedDishes.add(dish);
+            totalAbandonedDishesCount.incrementAndGet();
+            incrementDishCount(dish, abandonedDishCountMap);
+            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
         }
     }
 
-    public boolean noMoreDishesToMake() {
-        return dishesToMake.isEmpty();
+    public void markDishAsServed(Dish dish) {
+        synchronized (servedDishes) {
+            servedDishes.add(dish);
+            incrementDishCount(dish, servedDishCountMap);
+            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+        }
     }
 
-    public void displayAllDishesCount() {
-        System.out.println("Total dishes count: " + totalDishesCount.get());
-    }
-
-    // Display dish types and their counts for dishes to make
-    public void displayToMakeDishes() {
-        System.out.println("Dishes to make: " + dishesToMake.size());
-
-        // Create a map to count the occurrences of each dish type
-        Map<String, Integer> dishCountMap = new HashMap<>();
-        for (Dish dish : dishesToMake) {
-            if (dish != null) { // Check if the dish is not null
-                String dishType = dish.getClass().getSimpleName();
-                dishCountMap.put(dishType, dishCountMap.getOrDefault(dishType, 0) + 1);
-            } else {
-                System.out.println(" - Skipping null dish entry");
+    public Dish getMadeDishToServe() {
+        synchronized (madeDishes) {
+            if (madeDishes.isEmpty()) {
+                return null;
             }
-        }
-
-        // Print the count for each dish type
-        for (Map.Entry<String, Integer> entry : dishCountMap.entrySet()) {
-            System.out.println(" - " + entry.getKey() + ": " + entry.getValue());
+            return madeDishes.remove(0);  
         }
     }
 
-    // Display dish types and their counts for made dishes
-    public void displayMadeDishes() {
-        System.out.println("Made dishes: " + madeDishes.size());
+    public void displayDishHistory() {
+        System.out.println("Total dishes to make: " + totalDishesCount.get());
+        displayDishTypeCount("To-make dishes", toMakeDishCountMap);
+        System.out.println();
 
-        // Create a map to count the occurrences of each dish type
-        Map<String, Integer> dishCountMap = new HashMap<>();
-        for (Dish dish : madeDishes) {
-            if (dish != null) { // Check if the dish is not null
-                String dishType = dish.getClass().getSimpleName();
-                dishCountMap.put(dishType, dishCountMap.getOrDefault(dishType, 0) + 1);
-            } else {
-                System.out.println(" - Skipping null dish entry");
-            }
-        }
+        System.out.println("Total made dishes: " + getTotalDishCount(madeDishCountMap));
+        displayDishTypeCount("Made dishes", madeDishCountMap);
+        System.out.println();
 
-        // Print the count for each dish type
-        for (Map.Entry<String, Integer> entry : dishCountMap.entrySet()) {
-            System.out.println(" - " + entry.getKey() + ": " + entry.getValue());
+        System.out.println("Total served dishes: " + getTotalDishCount(servedDishCountMap));
+        displayDishTypeCount("Served dishes", servedDishCountMap);
+        System.out.println();
+
+        System.out.println("Total abandoned dishes: " + totalAbandonedDishesCount.get());
+        displayDishTypeCount("Abandoned dishes", abandonedDishCountMap);
+        System.out.println();
+    }
+
+    private void incrementDishCount(Dish dish, Map<String, AtomicInteger> dishCountMap) {
+        String dishType = dish.getClass().getSimpleName();
+        dishCountMap.putIfAbsent(dishType, new AtomicInteger(0));
+        dishCountMap.get(dishType).incrementAndGet();
+    }
+
+    private void displayDishTypeCount(String label, Map<String, AtomicInteger> dishCountMap) {
+        System.out.println(label + ":");
+        for (String dishType : allDishTypes) { 
+            int count = dishCountMap.getOrDefault(dishType, new AtomicInteger(0)).get();
+            System.out.println(" - " + dishType + ": " + count);
         }
     }
 
-    public void displayAbandonedDishes() {
-        System.out.println("Abandoned dishes: " + abandonedDishes.size());
+    private int getTotalDishCount(Map<String, AtomicInteger> dishCountMap) {
+        return dishCountMap.values().stream().mapToInt(AtomicInteger::get).sum();
     }
 }
