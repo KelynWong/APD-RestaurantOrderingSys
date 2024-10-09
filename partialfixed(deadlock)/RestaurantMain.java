@@ -16,7 +16,7 @@ public class RestaurantMain {
             inventory.addIngredient("salt", 30);
         }
 
-        int numberOfChefs = 10;
+        int numberOfChefs = 15;
         int numberOfWaiters = 5;
 
         // Create a shared executor for both waiters and chefs to run simultaneously
@@ -44,9 +44,38 @@ public class RestaurantMain {
         // Display final kitchen state and inventory
         if (sharedExecutor.isTerminated()) {
             System.out.println("\n--------------------------------");
-            System.out.println("Final kitchen state");
+            System.out.println("\tThe Kitchen");
             System.out.println("--------------------------------");
+            System.out.println("--------------------");
+            System.err.println("!!! ACTUAL !!!");
+            System.out.println("--------------------");
             kitchen.displayDishHistory();
+
+            System.out.println("--------------------");
+            System.err.println("!!! EXPECTED !!!");
+            System.out.println("--------------------");
+            System.out.println(
+                "Total dishes to make: 150\n" +
+                "To-make dishes:\n" +
+                " - SteamedEgg: 75\n" +
+                " - Omelette: 75\n\n" +
+                "Total made dishes: 150\n" +
+                "Made dishes:\n" +
+                " - SteamedEgg: 75\n" +
+                " - Omelette: 75\n\n" +
+                "Total served dishes: 150\n" +
+                "Served dishes:\n" +
+                " - SteamedEgg: 75\n" +
+                " - Omelette: 75\n\n" +
+                "Total abandoned dishes: 0\n" +
+                "Abandoned dishes:\n" +
+                " - SteamedEgg: 0\n" +
+                " - Omelette: 0"
+            );
+
+            System.out.println("\n--------------------------------");
+            System.out.println("\tInventory");
+            System.out.println("--------------------------------");
             inventory.displayInventory();
             System.out.println("Expected Inventory: {butter=0, salt=0, egg=0, milk=0, water=0}");
         }

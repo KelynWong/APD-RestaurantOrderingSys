@@ -7,7 +7,7 @@ public class Chef implements Runnable {
     private Inventory inventory;
     private int chefId;  
     private static final int MAX_ATTEMPTS = 5;
-    private static final int MAX_EMPTY_CHECKS = 800;  // Maximum consecutive empty checks before termination
+    private static final int MAX_EMPTY_CHECKS = 1000;  // Maximum consecutive empty checks before termination
     private static AtomicInteger activeChefsCount = new AtomicInteger(0);
 
     public Chef(int chefId, Kitchen kitchen, Inventory inventory) {
@@ -31,7 +31,7 @@ public class Chef implements Runnable {
                     break;
                 }
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
