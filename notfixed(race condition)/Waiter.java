@@ -1,7 +1,7 @@
 class Waiter implements Runnable {
     private int waiterId;
     private Kitchen kitchen;
-    private static final int MAX_SERVING_ATTEMPTS = 800;
+    private static final int MAX_SERVING_ATTEMPTS = 1000;
     private static final int SERVING_WAIT_TIME = 10;  // Wait 0.01 second between checks
 
     public Waiter(int waiterId, Kitchen kitchen) {

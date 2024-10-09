@@ -36,7 +36,7 @@ class Kitchen {
 
     public void addDishToMake(Dish dish) {
         try {
-            Thread.sleep(100);  // Artificial delay to exacerbate the race condition
+            Thread.sleep(10);  // Artificial delay to exacerbate the race condition
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
