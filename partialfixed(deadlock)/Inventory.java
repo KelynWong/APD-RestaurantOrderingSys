@@ -7,13 +7,24 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.Random;
 
 class Inventory {
+    // Singleton instance
+    private static Inventory instance;
+
     private Map<String, Integer> stock;
     private Map<String, Lock> locks;
     private Random random = new Random();
 
-    public Inventory() {
+    private Inventory() {
         stock = new HashMap<>();
         locks = new HashMap<>();
+    }
+
+    // Method to get the single instance of Inventory
+    public static synchronized Inventory getInstance() {
+        if (instance == null) {
+            instance = new Inventory();
+        }
+        return instance;
     }
 
     public void addIngredient(String ingredient, int quantity) {

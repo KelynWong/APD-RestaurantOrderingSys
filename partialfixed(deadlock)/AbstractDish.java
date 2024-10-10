@@ -1,10 +1,8 @@
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractDish implements Dish {
     protected Map<String, Integer> ingredients;
-    protected String state = "toMake";  // Initial state is "toMake"
 
     public AbstractDish() {
         ingredients = new HashMap<>();
@@ -23,15 +21,6 @@ public abstract class AbstractDish implements Dish {
             int count = ingredients.get(ingredient);
             count++;
             ingredients.put(ingredient, count);
-        }
-        checkIfMade();  // Check if all ingredients are prepared
-    }
-
-    // Check if all ingredients are set to 1, and update state
-    protected void checkIfMade() {
-        boolean allIngredientsPrepared = ingredients.values().stream().allMatch(i -> i == 1);
-        if (allIngredientsPrepared) {
-            state = "Made";  // Change state to Made
         }
     }
 }

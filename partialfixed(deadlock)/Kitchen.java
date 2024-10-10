@@ -2,6 +2,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class Kitchen {
+    // Singleton instance
+    private static Kitchen instance;
+
     private List<Dish> dishesToMake;  
     private List<Dish> madeDishes;
     private List<Dish> abandonedDishes;
@@ -14,33 +17,39 @@ class Kitchen {
     private Map<String, AtomicInteger> madeDishCountMap;
     private Map<String, AtomicInteger> servedDishCountMap;
     private Map<String, AtomicInteger> abandonedDishCountMap;
-    
+
     // Set of all dish types
     private Set<String> allDishTypes;
 
-    public Kitchen() {
+    // Private constructor to prevent instantiation
+    private Kitchen() {
         dishesToMake = new ArrayList<>();
         madeDishes = new ArrayList<>();
         abandonedDishes = new ArrayList<>();
         servedDishes = new ArrayList<>();
         totalDishesCount = new AtomicInteger(0);
         totalAbandonedDishesCount = new AtomicInteger(0);
-
         toMakeDishCountMap = new HashMap<>();
         madeDishCountMap = new HashMap<>();
         servedDishCountMap = new HashMap<>();
         abandonedDishCountMap = new HashMap<>();
-        
-        allDishTypes = new HashSet<>();  // To track all possible dish types
+        allDishTypes = new HashSet<>();
     }
 
-    public void addDishToMake(Dish dish) {
-        try {
-            Thread.sleep(10);  // Artificial delay to exacerbate the race condition
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+    // Method to get the single instance of Kitchen
+    public static synchronized Kitchen getInstance() {
+        if (instance == null) {
+            instance = new Kitchen();
         }
-
+        return instance;
+    }
+    
+    public void addDishToMake(Dish dish) {
+        // try {
+        //     Thread.sleep(1);  
+        // } catch (InterruptedException e) {
+        //     Thread.currentThread().interrupt();
+        // }
         dishesToMake.add(dish);  
         totalDishesCount.incrementAndGet();
 
@@ -58,30 +67,36 @@ class Kitchen {
                 Thread.currentThread().interrupt();
             }
             return dishesToMake.remove(0);
-        }
+        } 
     }
 
     public void markDishAsMade(Dish dish) {
-        dishesToMake.remove(dish);  // Remove from to-make list
-        madeDishes.add(dish);
-        incrementDishCount(dish, madeDishCountMap);
-        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-    }    
+        // synchronized (madeDishes) {
+            dishesToMake.remove(dish);
+            madeDishes.add(dish);
+            incrementDishCount(dish, madeDishCountMap);
+            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+        // }
+    }
 
     public void markDishAsAbandoned(Dish dish) {
-        dishesToMake.remove(dish);  // Remove from to-make list
-        abandonedDishes.add(dish);
-        totalAbandonedDishesCount.incrementAndGet();
-        incrementDishCount(dish, abandonedDishCountMap);
-        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-    }    
+        // synchronized (abandonedDishes) {
+            dishesToMake.remove(dish);
+            abandonedDishes.add(dish);
+            totalAbandonedDishesCount.incrementAndGet();
+            incrementDishCount(dish, abandonedDishCountMap);
+            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+        // }
+    }
 
     public void markDishAsServed(Dish dish) {
-        madeDishes.remove(dish);  // Remove from made list
-        servedDishes.add(dish);
-        incrementDishCount(dish, servedDishCountMap);
-        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-    }    
+        // synchronized (servedDishes) {
+            madeDishes.remove(dish);
+            servedDishes.add(dish);
+            incrementDishCount(dish, servedDishCountMap);
+            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+        // }
+    }
 
     public Dish getMadeDishToServe() {
         if (madeDishes.isEmpty()) {
