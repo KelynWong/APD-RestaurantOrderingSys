@@ -30,7 +30,7 @@ public class Kitchen {
                 }
             }
         }
-        System.out.println("Order processed: " + order);
+        // System.out.println("Order processed: " + order);
     }
 
     // Add a dish to the queue of dishes to make

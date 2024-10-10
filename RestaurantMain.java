@@ -15,11 +15,11 @@ public class RestaurantMain {
         inventory.addIngredient("salt", 100);
 
         // Create a fixed thread pool for waiters
-        int numberOfWaiters = 1;
+        int numberOfWaiters = 2;
         ExecutorService waiterExecutor = Executors.newFixedThreadPool(numberOfWaiters);
 
         // Create a fixed thread pool for chefs
-        int numberOfChefs = 2;
+        int numberOfChefs = 5;
         ExecutorService chefExecutor = Executors.newFixedThreadPool(numberOfChefs);
 
         // Submit Waiter tasks to the executor

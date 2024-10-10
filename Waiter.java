@@ -10,7 +10,7 @@ public class Waiter implements Runnable {
     @Override
     public void run() {
         Random random = new Random();
-        int maxOrders = 1;  // Limit the total number of orders
+        int maxOrders = 3;  // Limit the total number of orders
         for (int i = 0; i < maxOrders; i++) {
             Order order = new Order();
             // Create a random order with Steamed Egg and Omelette
