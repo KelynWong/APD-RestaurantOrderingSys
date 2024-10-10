@@ -35,11 +35,11 @@ class Kitchen {
     }
 
     public void addDishToMake(Dish dish) {
-        try {
-            Thread.sleep(1);  
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        // try {
+        //     Thread.sleep(1);  
+        // } catch (InterruptedException e) {
+        //     Thread.currentThread().interrupt();
+        // }
         dishesToMake.add(dish);  
         totalDishesCount.incrementAndGet();
 
@@ -47,7 +47,7 @@ class Kitchen {
         allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
     }
 
-    public synchronized Dish getDishToMake() {
+    public Dish getDishToMake() {
         if (dishesToMake.isEmpty()) {
             return null;
         } else {
@@ -57,17 +57,10 @@ class Kitchen {
                 Thread.currentThread().interrupt();
             }
             return dishesToMake.remove(0);
-        } else {
-            try {
-                Thread.sleep(100);  
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return dishesToMake.remove(0);
-        }
+        } 
     }
 
-    public synchronized void markDishAsMade(Dish dish) {
+    public void markDishAsMade(Dish dish) {
         // synchronized (madeDishes) {
             dishesToMake.remove(dish);
             madeDishes.add(dish);
@@ -86,7 +79,7 @@ class Kitchen {
         // }
     }
 
-    public synchronized void markDishAsServed(Dish dish) {
+    public void markDishAsServed(Dish dish) {
         // synchronized (servedDishes) {
             madeDishes.remove(dish);
             servedDishes.add(dish);
@@ -105,7 +98,7 @@ class Kitchen {
                 Thread.currentThread().interrupt();
             }
             return madeDishes.remove(0);  
-        // }
+        }
     }
 
     public void displayDishHistory() {
@@ -126,7 +119,7 @@ class Kitchen {
         System.out.println();
     }
 
-    private synchronized void incrementDishCount(Dish dish, Map<String, AtomicInteger> dishCountMap) {
+    private void incrementDishCount(Dish dish, Map<String, AtomicInteger> dishCountMap) {
         String dishType = dish.getClass().getSimpleName();
         dishCountMap.putIfAbsent(dishType, new AtomicInteger(0));
         dishCountMap.get(dishType).incrementAndGet();
