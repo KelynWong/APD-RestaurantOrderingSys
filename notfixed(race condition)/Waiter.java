@@ -1,4 +1,8 @@
-class Waiter implements Runnable {
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class Waiter implements Runnable {
     private int waiterId;
     private Kitchen kitchen;
     private static final int MAX_SERVING_ATTEMPTS = 1000;
@@ -11,22 +15,27 @@ class Waiter implements Runnable {
 
     @Override
     public void run() {
-        // Each waiter creates an order and submits it to the kitchen
-        Order order = new Order();
-        order.addDish("SteamedEgg", 10);
-        order.addDish("Omelette", 10);
+        // Read order from plain text config file
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("orders.txt"));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(" ");
+                String dishName = parts[0];
+                int quantity = Integer.parseInt(parts[1]);
 
-        // Submitting the dishes to the kitchen
-        for (String dishName : order.getDishes().keySet()) {
-            for (int j = 0; j < order.getDishes().get(dishName); j++) {
-                if (dishName.equals("SteamedEgg")) {
-                    kitchen.addDishToMake(new SteamedEgg());
-                } else if (dishName.equals("Omelette")) {
-                    kitchen.addDishToMake(new Omelette());
+                // Submitting the dishes to the kitchen
+                for (int j = 0; j < quantity; j++) {
+                    Dish dish = DishFactory.createDish(dishName);  // Use factory to create dish
+                    kitchen.addDishToMake(dish);
                 }
             }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        System.out.println("Waiter " + waiterId + " submitted order: " + order);
+
+        System.out.println("Waiter " + waiterId + " submitted order from config");
 
         // Waiter serves the made dishes after submitting the order
         serveDishes();
