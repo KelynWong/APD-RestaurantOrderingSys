@@ -34,9 +34,4 @@ public abstract class AbstractDish implements Dish {
             state = "Made";  // Change state to Made
         }
     }
-
-    @Override
-    public String getState() {
-        return state;
-    }
 }
