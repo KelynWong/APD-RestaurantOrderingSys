@@ -1,15 +1,25 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 class Inventory {
+    // Singleton instance
+    private static Inventory instance;
+
     private Map<String, Integer> stock;
     private Random random = new Random();
 
-    public Inventory() {
+    private Inventory() {
         stock = new HashMap<>();
+    }
+
+    // Method to get the single instance of Inventory
+    public static synchronized Inventory getInstance() {
+        if (instance == null) {
+            instance = new Inventory();
+        }
+        return instance;
     }
 
     public void addIngredient(String ingredient, int quantity) {

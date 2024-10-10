@@ -4,8 +4,9 @@ import java.util.concurrent.TimeUnit;
 
 public class RestaurantMain {
     public static void main(String[] args) {
-        Kitchen kitchen = new Kitchen();
-        Inventory inventory = new Inventory();
+        // Use the Singleton pattern to get the single instance of Kitchen n Inventory
+        Kitchen kitchen = Kitchen.getInstance();
+        Inventory inventory = Inventory.getInstance();
 
         // Add limited ingredients to the inventory
         for (int i = 0; i < 1000; i++) {

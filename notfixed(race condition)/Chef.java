@@ -1,7 +1,5 @@
 import java.util.concurrent.atomic.AtomicInteger;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class Chef implements Runnable {
     private Kitchen kitchen;
     private Inventory inventory;
