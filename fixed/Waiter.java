@@ -1,41 +1,39 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.util.Map;
 
 public class Waiter implements Runnable {
     private int waiterId;
     private Kitchen kitchen;
-    private static final int MAX_SERVING_ATTEMPTS = 1000;
-    private static final int SERVING_WAIT_TIME = 10;  // Wait 0.01 second between checks
+    private int maxServingAttempts;
+    private int servingWaitTime;
 
     public Waiter(int waiterId, Kitchen kitchen) {
         this.waiterId = waiterId;
         this.kitchen = kitchen;
+
+        // Load configuration values
+        Config config = Config.getInstance();
+        this.maxServingAttempts = config.getIntValue("MAX_SERVING_ATTEMPTS");
+        this.servingWaitTime = config.getIntValue("SERVING_WAIT_TIME");
     }
 
     @Override
     public void run() {
-        // Read order from plain text config file
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("config.txt"));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(" ");
-                String dishName = parts[0];
-                int quantity = Integer.parseInt(parts[1]);
+        // Get dish orders from the config
+        Config config = Config.getInstance();
+        Map<String, Integer> dishOrders = config.getDishOrders();
 
-                // Submitting the dishes to the kitchen
-                for (int j = 0; j < quantity; j++) {
-                    Dish dish = DishFactory.createDish(dishName);  // Use factory to create dish
-                    kitchen.addDishToMake(dish);
-                }
+        // Submit the dishes to the kitchen
+        for (Map.Entry<String, Integer> entry : dishOrders.entrySet()) {
+            String dishName = entry.getKey();
+            int quantity = entry.getValue();
+
+            for (int j = 0; j < quantity; j++) {
+                Dish dish = DishFactory.createDish(dishName);
+                kitchen.addDishToMake(dish);
             }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
-        System.out.println("Waiter " + waiterId + " submitted order from config");
+        System.out.println("Waiter " + waiterId + " submitted orders " + dishOrders);
 
         // Waiter serves the made dishes after submitting the order
         serveDishes();
@@ -43,15 +41,15 @@ public class Waiter implements Runnable {
 
     private void serveDishes() {
         int attempts = 0;
-        while (attempts < MAX_SERVING_ATTEMPTS) {
+        while (attempts < maxServingAttempts) {
             Dish dish = kitchen.getMadeDishToServe();
             if (dish != null) {
-                System.out.println("Waiter " + waiterId + " served: " + dish.getClass().getSimpleName());
+                System.out.println("Waiter " + waiterId + " served: " + dish.getClass().getSimpleName() + " (item: " + dish.hashCode() + ")");
                 kitchen.markDishAsServed(dish);
             } else {
                 attempts++;
                 try {
-                    Thread.sleep(SERVING_WAIT_TIME);  // Wait before checking again
+                    Thread.sleep(servingWaitTime);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;

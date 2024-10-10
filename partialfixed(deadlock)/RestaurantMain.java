@@ -1,24 +1,54 @@
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class RestaurantMain {
     public static void main(String[] args) {
-        // Use the Singleton pattern to get the single instance of Kitchen n Inventory
+        // Load configuration from config.txt
+        Config config = Config.getInstance();
+
+        // Get the number of chefs and waiters from the configuration
+        int numberOfChefs = config.getIntValue("NUMBER_OF_CHEFS");
+        int numberOfWaiters = config.getIntValue("NUMBER_OF_WAITERS");
+        
+        // Get inventory limited flag
+        int makeInventoryLimited = config.getIntValue("MAKE_INVENTORY_LIMITED");
+
+        // Get the dish quantities from the configuration
+        int steamedEggCount = config.getIntValue("SteamedEgg") * numberOfWaiters;
+        int omeletteCount = config.getIntValue("Omelette") * numberOfWaiters;
+
+        // Calculate total expected dishes (based on config file values)
+        int totalDishes = steamedEggCount + omeletteCount;
+
+        // Use the Singleton pattern to get the single instance of Kitchen and Inventory
         Kitchen kitchen = Kitchen.getInstance();
         Inventory inventory = Inventory.getInstance();
 
-        // Add limited ingredients to the inventory
-        for (int i = 0; i < 1000; i++) {
-            inventory.addIngredient("egg", 30);
-            inventory.addIngredient("milk", 15);
-            inventory.addIngredient("butter", 15);
-            inventory.addIngredient("water", 15);
-            inventory.addIngredient("salt", 30);
-        }
+        // Create a Random object for generating random limits
+        Random random = new Random();
 
-        int numberOfChefs = 1000;
-        int numberOfWaiters = 1000;
+        // Generate random maximum limits for ingredients
+        int maxEggQuantity = random.nextInt(150) + 50; // Random limit between 50 and 199
+        int maxMilkQuantity = random.nextInt(100) + 20; // Random limit between 20 and 119
+        int maxButterQuantity = random.nextInt(100) + 20; // Random limit between 20 and 119
+        int maxWaterQuantity = random.nextInt(150) + 50; // Random limit between 50 and 199
+        int maxSaltQuantity = random.nextInt(150) + 50; // Random limit between 50 and 199
+
+        // Calculate ingredient quantities based on inventory limit
+        int eggQuantity = makeInventoryLimited == 1 ? Math.min(steamedEggCount + omeletteCount, maxEggQuantity) : steamedEggCount + omeletteCount;
+        int milkQuantity = makeInventoryLimited == 1 ? Math.min(omeletteCount, maxMilkQuantity) : omeletteCount;
+        int butterQuantity = makeInventoryLimited == 1 ? Math.min(omeletteCount, maxButterQuantity) : omeletteCount;
+        int waterQuantity = makeInventoryLimited == 1 ? Math.min(steamedEggCount, maxWaterQuantity) : steamedEggCount;
+        int saltQuantity = makeInventoryLimited == 1 ? Math.min(steamedEggCount + omeletteCount, maxSaltQuantity) : (steamedEggCount + omeletteCount);
+
+        // Add limited ingredients to the inventory
+        inventory.addIngredient("egg", eggQuantity);
+        inventory.addIngredient("milk", milkQuantity);
+        inventory.addIngredient("butter", butterQuantity);
+        inventory.addIngredient("water", waterQuantity);
+        inventory.addIngredient("salt", saltQuantity);
 
         // Create a shared executor for both waiters and chefs to run simultaneously
         ExecutorService sharedExecutor = Executors.newFixedThreadPool(numberOfChefs + numberOfWaiters);
@@ -47,6 +77,8 @@ public class RestaurantMain {
             System.out.println("\n--------------------------------");
             System.out.println("\tThe Kitchen");
             System.out.println("--------------------------------");
+
+            // Dynamically calculate expected results based on the dish counts
             System.out.println("--------------------");
             System.err.println("!!! ACTUAL !!!");
             System.out.println("--------------------");
@@ -55,23 +87,31 @@ public class RestaurantMain {
             System.out.println("--------------------");
             System.err.println("!!! EXPECTED !!!");
             System.out.println("--------------------");
+
+            // Use the methods from Kitchen to get the abandoned dish counts
+            int abandonedEggs = kitchen.getAbandonedDishCount("SteamedEgg");
+            int abandonedOmelettes = kitchen.getAbandonedDishCount("Omelette");
+
+            // Calculate total abandoned dishes based on the actual abandoned counts
+            int totalAbandonedDishes = abandonedEggs + abandonedOmelettes;
+
             System.out.println(
-                "Total dishes to make: 150\n" +
+                "Total dishes to make: " + totalDishes + "\n" +
                 "To-make dishes:\n" +
-                " - SteamedEgg: 75\n" +
-                " - Omelette: 75\n\n" +
-                "Total made dishes: 150\n" +
+                " - SteamedEgg: " + steamedEggCount + "\n" +
+                " - Omelette: " + omeletteCount + "\n\n" +
+                "Total made dishes: " + (steamedEggCount + omeletteCount - totalAbandonedDishes) + "\n" +
                 "Made dishes:\n" +
-                " - SteamedEgg: 75\n" +
-                " - Omelette: 75\n\n" +
-                "Total served dishes: 150\n" +
+                " - SteamedEgg: " + (steamedEggCount - abandonedEggs) + "\n" +
+                " - Omelette: " + (omeletteCount - abandonedOmelettes) + "\n\n" +
+                "Total served dishes: " + (steamedEggCount + omeletteCount - totalAbandonedDishes) + "\n" +
                 "Served dishes:\n" +
-                " - SteamedEgg: 75\n" +
-                " - Omelette: 75\n\n" +
-                "Total abandoned dishes: 0\n" +
+                " - SteamedEgg: " + (steamedEggCount - abandonedEggs) + "\n" +
+                " - Omelette: " + (omeletteCount - abandonedOmelettes) + "\n\n" +
+                "Total abandoned dishes: " + totalAbandonedDishes + "\n" +
                 "Abandoned dishes:\n" +
-                " - SteamedEgg: 0\n" +
-                " - Omelette: 0"
+                " - SteamedEgg: " + abandonedEggs + "\n" +
+                " - Omelette: " + abandonedOmelettes
             );
 
             System.out.println("\n--------------------------------");

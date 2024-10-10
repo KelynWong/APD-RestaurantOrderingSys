@@ -18,6 +18,8 @@ class Kitchen {
     private Map<String, AtomicInteger> servedDishCountMap;
     private Map<String, AtomicInteger> abandonedDishCountMap;
 
+    private int sleepTime;
+
     // Set of all dish types
     private Set<String> allDishTypes;
 
@@ -34,6 +36,10 @@ class Kitchen {
         servedDishCountMap = new HashMap<>();
         abandonedDishCountMap = new HashMap<>();
         allDishTypes = new HashSet<>();
+
+        // Load configuration values
+        Config config = Config.getInstance();
+        this.sleepTime = config.getIntValue("SLEEP_TIME");
     }
 
     // Method to get the single instance of Kitchen
@@ -62,7 +68,7 @@ class Kitchen {
             return null;
         } else {
             try {
-                Thread.sleep(100);  
+                Thread.sleep(sleepTime);  
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -146,4 +152,8 @@ class Kitchen {
     private int getTotalDishCount(Map<String, AtomicInteger> dishCountMap) {
         return dishCountMap.values().stream().mapToInt(AtomicInteger::get).sum();
     }
+
+    public int getAbandonedDishCount(String dishType) {
+        return abandonedDishCountMap.getOrDefault(dishType, new AtomicInteger(0)).get();
+    }    
 }
