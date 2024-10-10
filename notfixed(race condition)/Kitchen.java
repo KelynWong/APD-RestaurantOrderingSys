@@ -57,6 +57,13 @@ class Kitchen {
                 Thread.currentThread().interrupt();
             }
             return dishesToMake.remove(0);
+        } else {
+            try {
+                Thread.sleep(100);  
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return dishesToMake.remove(0);
         }
     }
 
@@ -88,10 +95,14 @@ class Kitchen {
         // }
     }
 
-    public synchronized Dish getMadeDishToServe() {
-        // synchronized (madeDishes) {
-            if (madeDishes.isEmpty()) {
-                return null;
+    public Dish getMadeDishToServe() {
+        if (madeDishes.isEmpty()) {
+            return null;
+        } else {
+            try {
+                Thread.sleep(100);  
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
             return madeDishes.remove(0);  
         // }
