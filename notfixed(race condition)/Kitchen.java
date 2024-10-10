@@ -51,51 +51,46 @@ class Kitchen {
     public Dish getDishToMake() {
         if (dishesToMake.isEmpty()) {
             return null;
+        } else {
+            try {
+                Thread.sleep(100);  
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            return dishesToMake.remove(0);
         }
-
-        Dish dish = dishesToMake.get(0);  
-        try {
-            Thread.sleep(200);  
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        if (!dishesToMake.isEmpty() && dishesToMake.get(0).equals(dish)) {
-            dishesToMake.remove(0);  
-            return dish;
-        }
-        return null;
     }
 
     public void markDishAsMade(Dish dish) {
-        synchronized (madeDishes) {
-            madeDishes.add(dish);
-            incrementDishCount(dish, madeDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        }
-    }
+        dishesToMake.remove(dish);  // Remove from to-make list
+        madeDishes.add(dish);
+        incrementDishCount(dish, madeDishCountMap);
+        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+    }    
 
     public void markDishAsAbandoned(Dish dish) {
-        synchronized (abandonedDishes) {
-            abandonedDishes.add(dish);
-            totalAbandonedDishesCount.incrementAndGet();
-            incrementDishCount(dish, abandonedDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        }
-    }
+        dishesToMake.remove(dish);  // Remove from to-make list
+        abandonedDishes.add(dish);
+        totalAbandonedDishesCount.incrementAndGet();
+        incrementDishCount(dish, abandonedDishCountMap);
+        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+    }    
 
     public void markDishAsServed(Dish dish) {
-        synchronized (servedDishes) {
-            servedDishes.add(dish);
-            incrementDishCount(dish, servedDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        }
-    }
+        madeDishes.remove(dish);  // Remove from made list
+        servedDishes.add(dish);
+        incrementDishCount(dish, servedDishCountMap);
+        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+    }    
 
     public Dish getMadeDishToServe() {
-        synchronized (madeDishes) {
-            if (madeDishes.isEmpty()) {
-                return null;
+        if (madeDishes.isEmpty()) {
+            return null;
+        } else {
+            try {
+                Thread.sleep(100);  
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
             return madeDishes.remove(0);  
         }
