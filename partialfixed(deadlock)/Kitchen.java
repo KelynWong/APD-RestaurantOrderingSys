@@ -37,7 +37,7 @@ class Kitchen {
     }
 
     // Method to get the single instance of Kitchen
-    public static synchronized Kitchen getInstance() {
+    public static Kitchen getInstance() {
         if (instance == null) {
             instance = new Kitchen();
         }

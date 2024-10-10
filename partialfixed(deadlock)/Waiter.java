@@ -17,7 +17,7 @@ public class Waiter implements Runnable {
     public void run() {
         // Read order from plain text config file
         try {
-            BufferedReader reader = new BufferedReader(new FileReader("orders.txt"));
+            BufferedReader reader = new BufferedReader(new FileReader("config.txt"));
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(" ");

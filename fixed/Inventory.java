@@ -20,7 +20,7 @@ class Inventory {
     }
 
     // Method to get the single instance of Inventory
-    public static Inventory getInstance() {
+    public static synchronized Inventory getInstance() {
         if (instance == null) {
             instance = new Inventory();
         }
