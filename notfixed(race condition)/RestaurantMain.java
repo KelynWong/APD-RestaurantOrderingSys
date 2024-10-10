@@ -8,7 +8,7 @@ public class RestaurantMain {
         Inventory inventory = new Inventory();
 
         // Add limited ingredients to the inventory
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 1000; i++) {
             inventory.addIngredient("egg", 30);
             inventory.addIngredient("milk", 15);
             inventory.addIngredient("butter", 15);
@@ -16,8 +16,8 @@ public class RestaurantMain {
             inventory.addIngredient("salt", 30);
         }
 
-        int numberOfChefs = 15;
-        int numberOfWaiters = 5;
+        int numberOfChefs = 1000;
+        int numberOfWaiters = 1000;
 
         // Create a shared executor for both waiters and chefs to run simultaneously
         ExecutorService sharedExecutor = Executors.newFixedThreadPool(numberOfChefs + numberOfWaiters);

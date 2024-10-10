@@ -13,8 +13,8 @@ class Waiter implements Runnable {
     public void run() {
         // Each waiter creates an order and submits it to the kitchen
         Order order = new Order();
-        order.addDish("SteamedEgg", 15);
-        order.addDish("Omelette", 15);
+        order.addDish("SteamedEgg", 10);
+        order.addDish("Omelette", 10);
 
         // Submitting the dishes to the kitchen
         for (String dishName : order.getDishes().keySet()) {
