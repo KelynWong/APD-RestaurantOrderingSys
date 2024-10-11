@@ -14,9 +14,15 @@ class Inventory {
     private Map<String, Lock> locks;
     private Random random = new Random();
 
+    private int sleepTime;
+
     private Inventory() {
         stock = new HashMap<>();
         locks = new HashMap<>();
+
+        // Load configuration values
+        Config config = Config.getInstance();
+        this.sleepTime = config.getIntValue("SLEEP_TIME");
     }
 
     // Method to get the single instance of Inventory
@@ -50,7 +56,7 @@ class Inventory {
             if (lock != null) {
                 System.out.println(Thread.currentThread().getName() + " locking " + ingredient);
                 try {
-                    Thread.sleep(random.nextInt(100));  // Simulate random delays
+                    Thread.sleep(sleepTime);  
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }

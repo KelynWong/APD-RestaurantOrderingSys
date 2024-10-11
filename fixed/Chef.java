@@ -6,7 +6,7 @@ public class Chef implements Runnable {
     private int chefId;  
     private int maxAttempts;
     private int maxEmptyChecks;
-    private int sleepTime;
+    private int makeDishWaitTime;
     private static AtomicInteger activeChefsCount = new AtomicInteger(0);
 
     public Chef(int chefId, Kitchen kitchen, Inventory inventory) {
@@ -18,7 +18,7 @@ public class Chef implements Runnable {
         Config config = Config.getInstance();
         this.maxAttempts = config.getIntValue("MAX_ATTEMPTS");
         this.maxEmptyChecks = config.getIntValue("MAX_EMPTY_CHECKS");
-        this.sleepTime = config.getIntValue("SLEEP_TIME");
+        this.makeDishWaitTime = config.getIntValue("MAKE_DISH_WAIT_TIME");
     }
 
     @Override
@@ -36,7 +36,7 @@ public class Chef implements Runnable {
                     break;
                 }
                 try {
-                    Thread.sleep(sleepTime);  // Wait before checking again
+                    Thread.sleep(makeDishWaitTime);  // Wait before checking again
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;

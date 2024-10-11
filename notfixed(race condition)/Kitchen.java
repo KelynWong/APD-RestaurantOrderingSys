@@ -109,7 +109,7 @@ class Kitchen {
             return null;
         } else {
             try {
-                Thread.sleep(100);  
+                Thread.sleep(sleepTime);  
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

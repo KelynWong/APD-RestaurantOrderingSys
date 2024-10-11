@@ -2,12 +2,22 @@
 SteamedEgg 10
 Omelette 5
 
-# Configuration
+# Configurations
+# for waiter
 MAX_SERVING_ATTEMPTS 1000
 SERVING_WAIT_TIME 10
+
+# for chef
 MAX_ATTEMPTS 5
 MAX_EMPTY_CHECKS 1000
+MAKE_DISH_WAIT_TIME 10
+
+# the thread sleep time to increase chances of thread switching in critical sections
 SLEEP_TIME 10
+
+# thread counts
 NUMBER_OF_CHEFS 10
 NUMBER_OF_WAITERS 10
+
+# either 1 or 0: 0 = exact amount of ingredients, 1 = not enough ingredients for the dishes
 MAKE_INVENTORY_LIMITED 1

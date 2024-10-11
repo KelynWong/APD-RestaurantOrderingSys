@@ -29,7 +29,7 @@ public class Config {
         // List of known configuration keys
         Set<String> configKeys = new HashSet<>(Arrays.asList(
             "MAX_SERVING_ATTEMPTS", "SERVING_WAIT_TIME", "MAX_ATTEMPTS", 
-            "MAX_EMPTY_CHECKS", "SLEEP_TIME", "NUMBER_OF_CHEFS", "NUMBER_OF_WAITERS", "MAKE_INVENTORY_LIMITED"
+            "MAX_EMPTY_CHECKS", "SLEEP_TIME", "NUMBER_OF_CHEFS", "NUMBER_OF_WAITERS", "MAKE_INVENTORY_LIMITED", "MAKE_DISH_WAIT_TIME"
         ));
 
         try (BufferedReader reader = new BufferedReader(new FileReader("config.txt"))) {
