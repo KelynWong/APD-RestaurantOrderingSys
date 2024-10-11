@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class Kitchen {
@@ -19,6 +20,8 @@ class Kitchen {
     private Map<String, AtomicInteger> abandonedDishCountMap;
 
     private int sleepTime;
+
+    private final ReentrantLock lock = new ReentrantLock(true);
 
     // Set of all dish types
     private Set<String> allDishTypes;
@@ -51,69 +54,87 @@ class Kitchen {
     }
     
     public void addDishToMake(Dish dish) {
-        // try {
-        //     Thread.sleep(1);  
-        // } catch (InterruptedException e) {
-        //     Thread.currentThread().interrupt();
-        // }
-        dishesToMake.add(dish);  
-        totalDishesCount.incrementAndGet();
-
-        incrementDishCount(dish, toMakeDishCountMap);
-        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+        lock.lock();
+        try {
+            dishesToMake.add(dish);  
+            totalDishesCount.incrementAndGet();
+            incrementDishCount(dish, toMakeDishCountMap);
+            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+        } finally {
+            lock.unlock();
+        }
     }
 
     public Dish getDishToMake() {
-        if (dishesToMake.isEmpty()) {
-            return null;
-        } else {
-            try {
-                Thread.sleep(sleepTime);  
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return dishesToMake.remove(0);
-        } 
+        lock.lock();
+        try {
+            if (dishesToMake.isEmpty()) {
+                return null;
+            } else {
+                try {
+                    Thread.sleep(sleepTime);  
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return dishesToMake.remove(0);
+            } 
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void markDishAsMade(Dish dish) {
-        // synchronized (madeDishes) {
+        lock.lock();
+        try {
             dishesToMake.remove(dish);
             madeDishes.add(dish);
             incrementDishCount(dish, madeDishCountMap);
             allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        // }
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void markDishAsAbandoned(Dish dish) {
-        // synchronized (abandonedDishes) {
+        lock.lock();
+        try {
             dishesToMake.remove(dish);
             abandonedDishes.add(dish);
             totalAbandonedDishesCount.incrementAndGet();
             incrementDishCount(dish, abandonedDishCountMap);
             allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        // }
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void markDishAsServed(Dish dish) {
-        // synchronized (servedDishes) {
+        lock.lock();
+        try {
             madeDishes.remove(dish);
             servedDishes.add(dish);
             incrementDishCount(dish, servedDishCountMap);
             allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        // }
+        } finally {
+            lock.unlock();
+        }
     }
 
     public Dish getMadeDishToServe() {
-        if (madeDishes.isEmpty()) {
-            return null;
-        } else {
-            try {
-                Thread.sleep(sleepTime);  
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return madeDishes.remove(0);  
+        lock.lock();
+        try {
+            if (madeDishes.isEmpty()) {
+                return null;
+            } else {
+                try {
+                    Thread.sleep(sleepTime);  
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return madeDishes.remove(0);  
+            } 
+        } finally {
+            lock.unlock();
         }
     }
 
