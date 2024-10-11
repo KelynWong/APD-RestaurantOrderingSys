@@ -64,10 +64,6 @@ public class Config {
         }
     }    
 
-    private boolean isNumeric(String str) {
-        return str != null && str.matches("\\d+");
-    }
-
     public String getValue(String key) {
         return configValues.get(key);
     }

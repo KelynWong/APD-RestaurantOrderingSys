@@ -28,8 +28,15 @@ public class Waiter implements Runnable {
             int quantity = entry.getValue();
 
             for (int j = 0; j < quantity; j++) {
-                Dish dish = DishFactory.createDish(dishName);
-                kitchen.addDishToMake(dish);
+                try {
+                    // Try to create the dish from the factory
+                    Dish dish = DishFactory.createDish(dishName);
+                    kitchen.addDishToMake(dish);
+                } catch (IllegalArgumentException e) {
+                    // handle invalid dish types
+                    System.err.println("Waiter " + waiterId + ": Skipping invalid dish type '" + dishName + "'. Error: " + e.getMessage());
+                    continue; 
+                }
             }
         }
 
