@@ -50,56 +50,50 @@ public class Inventory {
     
         // Get ingredients and shuffle them to randomize the order of locking
         var ingredients = new ArrayList<>(dish.getIngredients().keySet());
-        Collections.shuffle(ingredients);  // Randomize the order to make more obvious
-
-        // List to track successfully used ingredients for later reversion
-        ArrayList<String> usedIngredients = new ArrayList<>();
+        Collections.shuffle(ingredients);  // Randomize the order to increase the chance of deadlock
     
-        // Lock and use each ingredient
-        for (String ingredient : ingredients) {
-            Lock lock = locks.get(ingredient);
-            if (lock != null) {
-                try {
-                    // Acquire the lock on the ingredient
+        // List to track successfully locked ingredients
+        ArrayList<String> lockedIngredients = new ArrayList<>();
+    
+        // Acquire all locks before using any ingredient
+        try {
+            for (String ingredient : ingredients) {
+                Lock lock = locks.get(ingredient);
+                if (lock != null) {
                     System.out.println(Thread.currentThread().getName() + " locking " + ingredient);
-                    lock.lock();
-                    try {
-                        Thread.sleep(sleepTime); 
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    } 
-                    
-                    // Try to use the ingredient
-                    if (!useIngredient(ingredient)) {
-                        success = false;
-                        break;
-                    } else {
-                        // If successful, add the ingredient to the used list
-                        usedIngredients.add(ingredient);
-                    }
-                } finally {
-                    // Unlock the ingredient in the finally block
+                    lock.lock();  // Acquire the lock
+                    lockedIngredients.add(ingredient);  // Track the locked ingredient
+                }
+            }
+    
+            // Try to use the ingredients after acquiring all locks
+            for (String ingredient : ingredients) {
+                if (!useIngredient(ingredient)) {
+                    success = false;
+                    break;
+                }
+            }
+        } finally {
+            // Release all locks at the end
+            for (int i = lockedIngredients.size() - 1; i >= 0; i--) {
+                String ingredient = lockedIngredients.get(i);
+                Lock lock = locks.get(ingredient);
+                if (lock != null) {
                     System.out.println(Thread.currentThread().getName() + " unlocking " + ingredient);
-                    try {
-                        Thread.sleep(sleepTime); 
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                    lock.unlock();
+                    lock.unlock();  // Release the lock
                 }
             }
         }
     
         // If any ingredient usage failed, revert the changes
         if (!success) {
-            // Revert the used ingredients (put them back into inventory)
-            for (String ingredient : usedIngredients) {
+            for (String ingredient : ingredients) {
                 returnIngredient(ingredient);
             }
         }
     
         return success;
-    }
+    }    
     
     public void returnIngredient(String ingredient) {
         AtomicInteger count = stock.get(ingredient);
