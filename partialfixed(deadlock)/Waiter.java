@@ -1,3 +1,5 @@
+package apd.proj;
+
 import java.util.Map;
 
 public class Waiter implements Runnable {

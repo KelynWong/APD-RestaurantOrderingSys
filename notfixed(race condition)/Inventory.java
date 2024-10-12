@@ -1,9 +1,11 @@
+package apd.proj;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-class Inventory {
+public class Inventory {
     // Singleton instance
     private static Inventory instance;
 

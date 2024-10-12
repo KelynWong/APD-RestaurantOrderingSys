@@ -1,3 +1,5 @@
+package apd.proj;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -6,7 +8,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.Random;
 
-class Inventory {
+public class Inventory {
     // Singleton instance
     private static Inventory instance;
 
