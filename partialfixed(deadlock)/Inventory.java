@@ -42,13 +42,11 @@ class Inventory {
         return stock.getOrDefault(ingredient, 0) > 0;
     }
 
-    // Simulate deadlock by locking ingredients in different orders between chefs
     public boolean useIngredientsForDish(Dish dish) {
         boolean success = true;
 
-        // Get ingredients and shuffle them to randomize the order of locking
         var ingredients = new ArrayList<>(dish.getIngredients().keySet());
-        Collections.shuffle(ingredients);  // Randomize the order to make more obvious
+        Collections.shuffle(ingredients);  // Randomize the order of ingredients to make deadlock more obvious
         
         // Lock each ingredient before using
         for (String ingredient : ingredients) {
@@ -80,7 +78,7 @@ class Inventory {
                 if (lock != null) {
                     System.out.println(Thread.currentThread().getName() + " unlocking " + ingredient);
                     try {
-                        Thread.sleep(random.nextInt(100));  // Simulate random delays
+                        Thread.sleep(sleepTime);  // Simulate random delays
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
