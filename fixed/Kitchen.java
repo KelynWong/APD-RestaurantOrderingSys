@@ -23,10 +23,15 @@ public class Kitchen {
 
     private int sleepTime;
 
-    private final ReentrantLock lock = new ReentrantLock(true);
-
     // Set of all dish types
     private Set<String> allDishTypes;
+
+    private final ReentrantLock toMakeLock = new ReentrantLock();
+    private final ReentrantLock madeLock = new ReentrantLock();
+    private final ReentrantLock servedLock = new ReentrantLock();
+    private final ReentrantLock abandonedLock = new ReentrantLock();
+
+    private final ReentrantLock dishCountLock = new ReentrantLock(); // New lock for shared resources
 
     // Private constructor to prevent instantiation
     private Kitchen() {
@@ -56,19 +61,19 @@ public class Kitchen {
     }
     
     public void addDishToMake(Dish dish) {
-        lock.lock();
+        toMakeLock.lock();  // Use toMakeLock for dishesToMake
         try {
             dishesToMake.add(dish);  
             totalDishesCount.incrementAndGet();
             incrementDishCount(dish, toMakeDishCountMap);
             allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
         } finally {
-            lock.unlock();
+            toMakeLock.unlock();
         }
-    }
+    }    
 
     public Dish getDishToMake() {
-        lock.lock();
+        toMakeLock.lock();  // Use toMakeLock for dishesToMake
         try {
             if (dishesToMake.isEmpty()) {
                 return null;
@@ -81,64 +86,91 @@ public class Kitchen {
                 return dishesToMake.remove(0);
             } 
         } finally {
-            lock.unlock();
+            toMakeLock.unlock();
         }
-    }
+    }    
 
     public void markDishAsMade(Dish dish) {
-        lock.lock();
+        toMakeLock.lock();
+        madeLock.lock();
         try {
             dishesToMake.remove(dish);
             madeDishes.add(dish);
-            incrementDishCount(dish, madeDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
         } finally {
-            lock.unlock();
+            madeLock.unlock();
+            toMakeLock.unlock();
+        }
+
+        // Update dish count and types (dishCountLock is used for shared resources)
+        dishCountLock.lock();
+        try {
+            incrementDishCount(dish, madeDishCountMap);
+            allDishTypes.add(dish.getClass().getSimpleName());
+        } finally {
+            dishCountLock.unlock();
         }
     }
 
     public void markDishAsAbandoned(Dish dish) {
-        lock.lock();
+        toMakeLock.lock();
+        abandonedLock.lock();
         try {
             dishesToMake.remove(dish);
-            abandonedDishes.add(dish);
-            totalAbandonedDishesCount.incrementAndGet();
-            incrementDishCount(dish, abandonedDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+            abandonedDishes.add(dish);  // This should be abandonedDishes, not madeDishes
+            totalAbandonedDishesCount.incrementAndGet();  // Atomic and thread-safe
         } finally {
-            lock.unlock();
+            abandonedLock.unlock();
+            toMakeLock.unlock();
         }
-    }
+    
+        // Update dish count and types (dishCountLock is used for shared resources)
+        dishCountLock.lock();
+        try {
+            incrementDishCount(dish, abandonedDishCountMap);  // Increment abandonedDishCountMap
+            allDishTypes.add(dish.getClass().getSimpleName());
+        } finally {
+            dishCountLock.unlock();
+        }
+    }    
 
     public void markDishAsServed(Dish dish) {
-        lock.lock();
+        madeLock.lock();   // Lock the madeDishes list
+        servedLock.lock(); // Lock the servedDishes list
         try {
-            madeDishes.remove(dish);
-            servedDishes.add(dish);
-            incrementDishCount(dish, servedDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+            madeDishes.remove(dish);  // Remove from madeDishes
+            servedDishes.add(dish);   // Add to servedDishes
         } finally {
-            lock.unlock();
+            servedLock.unlock();
+            madeLock.unlock();
         }
-    }
+    
+        // Update dish count and types (dishCountLock is used for shared resources)
+        dishCountLock.lock();
+        try {
+            incrementDishCount(dish, servedDishCountMap);  // Increment servedDishCountMap
+            allDishTypes.add(dish.getClass().getSimpleName());
+        } finally {
+            dishCountLock.unlock();
+        }
+    }    
 
     public Dish getMadeDishToServe() {
-        lock.lock();
+        madeLock.lock();
         try {
             if (madeDishes.isEmpty()) {
                 return null;
             } else {
                 try {
-                    Thread.sleep(sleepTime);  
+                    Thread.sleep(sleepTime);  // Simulate delay in serving
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-                return madeDishes.remove(0);  
+                return madeDishes.remove(0);  // Serve the first made dish
             } 
         } finally {
-            lock.unlock();
+            madeLock.unlock();
         }
-    }
+    }    
 
     public void displayDishHistory() {
         System.out.println("Total dishes to make: " + totalDishesCount.get());
