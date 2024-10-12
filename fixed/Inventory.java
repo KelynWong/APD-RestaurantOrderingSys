@@ -1,6 +1,9 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.Random;
 
 class Inventory {
@@ -8,12 +11,14 @@ class Inventory {
     private static Inventory instance;
 
     private Map<String, Integer> stock;
+    private Map<String, Lock> locks;
     private Random random = new Random();
 
     private int sleepTime;
 
     private Inventory() {
         stock = new HashMap<>();
+        locks = new HashMap<>();
 
         // Load configuration values
         Config config = Config.getInstance();
@@ -30,6 +35,7 @@ class Inventory {
 
     public void addIngredient(String ingredient, int quantity) {
         stock.put(ingredient, stock.getOrDefault(ingredient, 0) + quantity);
+        locks.putIfAbsent(ingredient, new ReentrantLock());  // Create a lock for each ingredient
     }
 
     public boolean hasIngredient(String ingredient) {
@@ -39,15 +45,48 @@ class Inventory {
     public boolean useIngredientsForDish(Dish dish) {
         boolean success = true;
 
-        // Get ingredients needed for the dish
+        // Get ingredients and shuffle them to randomize the order of locking
         var ingredients = new ArrayList<>(dish.getIngredients().keySet());
-        // Collections.shuffle(ingredients);  // Randomize the order
+        Collections.shuffle(ingredients);  // Randomize the order to make more obvious
 
-        // Try to use the ingredients
+        ingredients.sort(String::compareTo);  // Sort the ingredients to ensure the locking order is always the same
+        
+        // Lock each ingredient before using
         for (String ingredient : ingredients) {
-            if (!useIngredient(ingredient)) {
-                success = false;
-                break;
+            Lock lock = locks.get(ingredient);
+            if (lock != null) {
+                System.out.println(Thread.currentThread().getName() + " locking " + ingredient);
+                try {
+                    Thread.sleep(sleepTime);  
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                lock.lock();  // Acquire the lock on the ingredient
+            }
+        }
+
+        // Try to use the ingredients after acquiring locks
+        try {
+            for (String ingredient : ingredients) {
+                if (!useIngredient(ingredient)) {
+                    success = false;
+                    break;
+                }
+            }
+        } finally {
+            // Unlock all ingredients in reverse order
+            for (int i = ingredients.size() - 1; i >= 0; i--) {
+                String ingredient = ingredients.get(i);
+                Lock lock = locks.get(ingredient);
+                if (lock != null) {
+                    System.out.println(Thread.currentThread().getName() + " unlocking " + ingredient);
+                    try {
+                        Thread.sleep(sleepTime);  // Simulate random delays
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    lock.unlock();  // Release the lock on the ingredient
+                }
             }
         }
 
