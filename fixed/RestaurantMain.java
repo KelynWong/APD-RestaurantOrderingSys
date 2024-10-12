@@ -32,11 +32,11 @@ public class RestaurantMain {
         Random random = new Random();
 
         // Generate random maximum limits for ingredients
-        int maxEggQuantity = random.nextInt(150) + 50; // Random limit between 50 and 199
-        int maxMilkQuantity = random.nextInt(100) + 20; // Random limit between 20 and 119
-        int maxButterQuantity = random.nextInt(100) + 20; // Random limit between 20 and 119
-        int maxWaterQuantity = random.nextInt(150) + 50; // Random limit between 50 and 199
-        int maxSaltQuantity = random.nextInt(150) + 50; // Random limit between 50 and 199
+        int maxEggQuantity = random.nextInt(steamedEggCount + omeletteCount); 
+        int maxMilkQuantity = random.nextInt(omeletteCount); 
+        int maxButterQuantity = random.nextInt(omeletteCount); 
+        int maxWaterQuantity = random.nextInt(steamedEggCount); 
+        int maxSaltQuantity = random.nextInt(steamedEggCount + omeletteCount); 
 
         // Calculate ingredient quantities based on inventory limit
         int eggQuantity = makeInventoryLimited == 1 ? Math.min(steamedEggCount + omeletteCount, maxEggQuantity) : steamedEggCount + omeletteCount;
@@ -133,11 +133,6 @@ public class RestaurantMain {
             System.out.println("--------------------------------");
             inventory.displayInventory();  // Display actual inventory
 
-            System.out.println("eggQuantity " + eggQuantity);
-            System.out.println("saltQuantity " + saltQuantity);
-            System.out.println("waterQuantity " + waterQuantity);
-            System.out.println("milkQuantity " + milkQuantity);
-            System.out.println("butterQuantity " + butterQuantity);
             // Dynamically calculated expected remaining inventory:
             System.out.println("Expected Inventory: {"
                 + "butter=" + remainingButter + ", "
