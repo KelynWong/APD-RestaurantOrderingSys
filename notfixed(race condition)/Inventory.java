@@ -43,17 +43,35 @@ public class Inventory {
 
         // Get ingredients needed for the dish
         var ingredients = new ArrayList<>(dish.getIngredients().keySet());
-        // Collections.shuffle(ingredients);  // Randomize the order
+
+        // List to track successfully used ingredients for later reversion
+        ArrayList<String> usedIngredients = new ArrayList<>();
 
         // Try to use the ingredients
         for (String ingredient : ingredients) {
-            if (!useIngredient(ingredient)) {
+            if (useIngredient(ingredient)) {
+                usedIngredients.add(ingredient);  // Keep track of successfully used ingredients
+            } else {
                 success = false;
                 break;
             }
         }
 
+        // If any ingredient usage failed, revert the changes
+        if (!success) {
+            // Revert the used ingredients (put them back into inventory)
+            for (String ingredient : usedIngredients) {
+                returnIngredient(ingredient);
+            }
+        }
+
         return success;
+    }
+
+    public void returnIngredient(String ingredient) {
+        if (ingredient != null && stock.containsKey(ingredient)) {
+            stock.put(ingredient, stock.get(ingredient) + 1);  // Add back the ingredient
+        }
     }
 
     public boolean useIngredient(String ingredient) {
