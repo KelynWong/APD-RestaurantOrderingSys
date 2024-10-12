@@ -114,11 +114,35 @@ public class RestaurantMain {
                 " - Omelette: " + abandonedOmelettes
             );
 
+            // Calculate how many dishes were actually made
+            int steamedEggsMade = steamedEggCount - abandonedEggs;
+            int omelettesMade = omeletteCount - abandonedOmelettes;
+
+            // Calculate the remaining quantities of each ingredient
+            int remainingEgg = eggQuantity - (steamedEggsMade + omelettesMade);
+            int remainingSalt = saltQuantity - (steamedEggsMade + omelettesMade);
+            int remainingWater = waterQuantity - steamedEggsMade;
+            int remainingMilk = milkQuantity - omelettesMade;
+            int remainingButter = butterQuantity - omelettesMade;
+
+            // Display expected inventory based on remaining ingredients
             System.out.println("\n--------------------------------");
             System.out.println("\tInventory");
             System.out.println("--------------------------------");
-            inventory.displayInventory();
-            System.out.println("Expected Inventory: {butter=0, salt=0, egg=0, milk=0, water=0}");
+            inventory.displayInventory();  // Display actual inventory
+
+            System.out.println("eggQuantity " + eggQuantity);
+            System.out.println("saltQuantity " + saltQuantity);
+            System.out.println("waterQuantity " + waterQuantity);
+            System.out.println("milkQuantity " + milkQuantity);
+            System.out.println("butterQuantity " + butterQuantity);
+            // Dynamically calculated expected remaining inventory:
+            System.out.println("Expected Inventory: {"
+                + "butter=" + remainingButter + ", "
+                + "salt=" + remainingSalt + ", "
+                + "egg=" + remainingEgg + ", "
+                + "milk=" + remainingMilk + ", "
+                + "water=" + remainingWater + "}");
         }
     }
 }
