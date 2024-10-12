@@ -1,3 +1,5 @@
+package apd.proj.notfixed;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Chef implements Runnable {

@@ -1,7 +1,10 @@
+package apd.proj.fixed;
+
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class Kitchen {
+public class Kitchen {
     // Singleton instance
     private static Kitchen instance;
 
@@ -22,6 +25,13 @@ class Kitchen {
 
     // Set of all dish types
     private Set<String> allDishTypes;
+
+    private final ReentrantLock toMakeLock = new ReentrantLock();
+    private final ReentrantLock madeLock = new ReentrantLock();
+    private final ReentrantLock servedLock = new ReentrantLock();
+    private final ReentrantLock abandonedLock = new ReentrantLock();
+
+    private final ReentrantLock dishCountLock = new ReentrantLock(); // New lock for shared resources
 
     // Private constructor to prevent instantiation
     private Kitchen() {
@@ -51,71 +61,116 @@ class Kitchen {
     }
     
     public void addDishToMake(Dish dish) {
-        // try {
-        //     Thread.sleep(1);  
-        // } catch (InterruptedException e) {
-        //     Thread.currentThread().interrupt();
-        // }
-        dishesToMake.add(dish);  
-        totalDishesCount.incrementAndGet();
-
-        incrementDishCount(dish, toMakeDishCountMap);
-        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-    }
+        toMakeLock.lock();  // Use toMakeLock for dishesToMake
+        try {
+            dishesToMake.add(dish);  
+            totalDishesCount.incrementAndGet();
+            incrementDishCount(dish, toMakeDishCountMap);
+            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
+        } finally {
+            toMakeLock.unlock();
+        }
+    }    
 
     public Dish getDishToMake() {
-        if (dishesToMake.isEmpty()) {
-            return null;
-        } else {
-            try {
-                Thread.sleep(sleepTime);  
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return dishesToMake.remove(0);
-        } 
-    }
+        toMakeLock.lock();  // Use toMakeLock for dishesToMake
+        try {
+            if (dishesToMake.isEmpty()) {
+                return null;
+            } else {
+                try {
+                    Thread.sleep(sleepTime);  
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return dishesToMake.remove(0);
+            } 
+        } finally {
+            toMakeLock.unlock();
+        }
+    }    
 
     public void markDishAsMade(Dish dish) {
-        // synchronized (madeDishes) {
+        toMakeLock.lock();
+        madeLock.lock();
+        try {
             dishesToMake.remove(dish);
             madeDishes.add(dish);
+        } finally {
+            madeLock.unlock();
+            toMakeLock.unlock();
+        }
+
+        // Update dish count and types (dishCountLock is used for shared resources)
+        dishCountLock.lock();
+        try {
             incrementDishCount(dish, madeDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        // }
+            allDishTypes.add(dish.getClass().getSimpleName());
+        } finally {
+            dishCountLock.unlock();
+        }
     }
 
     public void markDishAsAbandoned(Dish dish) {
-        // synchronized (abandonedDishes) {
+        toMakeLock.lock();
+        abandonedLock.lock();
+        try {
             dishesToMake.remove(dish);
-            abandonedDishes.add(dish);
-            totalAbandonedDishesCount.incrementAndGet();
-            incrementDishCount(dish, abandonedDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        // }
-    }
+            abandonedDishes.add(dish);  // This should be abandonedDishes, not madeDishes
+            totalAbandonedDishesCount.incrementAndGet();  // Atomic and thread-safe
+        } finally {
+            abandonedLock.unlock();
+            toMakeLock.unlock();
+        }
+    
+        // Update dish count and types (dishCountLock is used for shared resources)
+        dishCountLock.lock();
+        try {
+            incrementDishCount(dish, abandonedDishCountMap);  // Increment abandonedDishCountMap
+            allDishTypes.add(dish.getClass().getSimpleName());
+        } finally {
+            dishCountLock.unlock();
+        }
+    }    
 
     public void markDishAsServed(Dish dish) {
-        // synchronized (servedDishes) {
-            madeDishes.remove(dish);
-            servedDishes.add(dish);
-            incrementDishCount(dish, servedDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        // }
-    }
+        madeLock.lock();   // Lock the madeDishes list
+        servedLock.lock(); // Lock the servedDishes list
+        try {
+            madeDishes.remove(dish);  // Remove from madeDishes
+            servedDishes.add(dish);   // Add to servedDishes
+        } finally {
+            servedLock.unlock();
+            madeLock.unlock();
+        }
+    
+        // Update dish count and types (dishCountLock is used for shared resources)
+        dishCountLock.lock();
+        try {
+            incrementDishCount(dish, servedDishCountMap);  // Increment servedDishCountMap
+            allDishTypes.add(dish.getClass().getSimpleName());
+        } finally {
+            dishCountLock.unlock();
+        }
+    }    
 
     public Dish getMadeDishToServe() {
-        if (madeDishes.isEmpty()) {
-            return null;
-        } else {
-            try {
-                Thread.sleep(sleepTime);  
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return madeDishes.remove(0);  
+        madeLock.lock();
+        try {
+            if (madeDishes.isEmpty()) {
+                return null;
+            } else {
+                try {
+                    Thread.sleep(sleepTime);  // Simulate delay in serving
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return madeDishes.remove(0);  // Serve the first made dish
+            } 
+        } finally {
+            madeLock.unlock();
         }
-    }
+    }    
 
     public void displayDishHistory() {
         System.out.println("Total dishes to make: " + totalDishesCount.get());

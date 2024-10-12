@@ -1,3 +1,5 @@
+package apd.proj.fixed;
+
 import java.util.Map;
 
 public interface Dish {

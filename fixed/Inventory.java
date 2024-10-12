@@ -1,3 +1,5 @@
+package apd.proj.fixed;
+
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -7,7 +9,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.Random;
 
-class Inventory {
+public class Inventory {
     // Singleton instance
     private static Inventory instance;
 

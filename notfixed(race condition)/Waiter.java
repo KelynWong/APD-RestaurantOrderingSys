@@ -1,3 +1,5 @@
+package apd.proj.notfixed;
+
 import java.util.Map;
 
 public class Waiter implements Runnable {

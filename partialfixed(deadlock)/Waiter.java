@@ -1,3 +1,5 @@
+package apd.proj.partialfixed;
+
 import java.util.Map;
 
 public class Waiter implements Runnable {

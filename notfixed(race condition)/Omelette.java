@@ -1,5 +1,6 @@
-public class Omelette extends AbstractDish {
+package apd.proj.notfixed;
 
+public class Omelette extends AbstractDish {
     public Omelette() {
         // Initialize with ingredients all set to 0 (not prepared)
         ingredients.put("egg", 0);
@@ -7,6 +8,4 @@ public class Omelette extends AbstractDish {
         ingredients.put("milk", 0);
         ingredients.put("butter", 0);
     }
-
-    // You can add more specific logic here if needed
 }

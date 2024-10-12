@@ -1,3 +1,5 @@
+package apd.proj.partialfixed;
+
 public class DishFactory {
     public static Dish createDish(String dishType) {
         switch (dishType.toLowerCase()) {

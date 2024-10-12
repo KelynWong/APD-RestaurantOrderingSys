@@ -1,7 +1,9 @@
+package apd.proj.partialfixed;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class Kitchen {
+public class Kitchen {
     // Singleton instance
     private static Kitchen instance;
 
