@@ -36,67 +36,76 @@ public class Inventory {
         return instance;
     }
 
-    public synchronized void addIngredient(String ingredient, int quantity) {
+    public void addIngredient(String ingredient, int quantity) {
         stock.computeIfAbsent(ingredient, k -> new AtomicInteger(0)).addAndGet(quantity);
         locks.putIfAbsent(ingredient, new ReentrantLock());
     }
 
-    public synchronized boolean hasIngredient(String ingredient) {
+    public boolean hasIngredient(String ingredient) {
         return stock.getOrDefault(ingredient, new AtomicInteger(0)).get() > 0;
     }
 
-    public synchronized boolean useIngredientsForDish(Dish dish) {
+    public boolean useIngredientsForDish(Dish dish) {
         boolean success = true;
-
+    
         // Get ingredients and shuffle them to randomize the order of locking
         var ingredients = new ArrayList<>(dish.getIngredients().keySet());
         Collections.shuffle(ingredients);  // Randomize the order to make more obvious
-
+    
         ingredients.sort(String::compareTo);  // Sort the ingredients to ensure the locking order is always the same
-        
-        // Lock each ingredient before using
+    
+        // List to track successfully used ingredients for later reversion
+        ArrayList<String> usedIngredients = new ArrayList<>();
+    
+        // Lock and use each ingredient
         for (String ingredient : ingredients) {
             Lock lock = locks.get(ingredient);
             if (lock != null) {
-                System.out.println(Thread.currentThread().getName() + " locking " + ingredient);
                 try {
+                    // Acquire the lock on the ingredient
+                    System.out.println(Thread.currentThread().getName() + " locking " + ingredient);
+                    lock.lock();
                     Thread.sleep(sleepTime);  
+                    
+                    // Try to use the ingredient
+                    if (!useIngredient(ingredient)) {
+                        success = false;
+                        break;
+                    } else {
+                        // If successful, add the ingredient to the used list
+                        usedIngredients.add(ingredient);
+                    }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                }
-                lock.lock();  // Acquire the lock on the ingredient
-            }
-        }
-
-        // Try to use the ingredients after acquiring locks
-        try {
-            for (String ingredient : ingredients) {
-                if (!useIngredient(ingredient)) {
                     success = false;
                     break;
-                }
-            }
-        } finally {
-            // Unlock all ingredients in reverse order
-            for (int i = ingredients.size() - 1; i >= 0; i--) {
-                String ingredient = ingredients.get(i);
-                Lock lock = locks.get(ingredient);
-                if (lock != null) {
+                } finally {
+                    // Unlock the ingredient in the finally block
                     System.out.println(Thread.currentThread().getName() + " unlocking " + ingredient);
-                    try {
-                        Thread.sleep(sleepTime);  // Simulate random delays
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                    lock.unlock();  // Release the lock on the ingredient
+                    lock.unlock();
                 }
             }
         }
-
+    
+        // If any ingredient usage failed, revert the changes
+        if (!success) {
+            // Revert the used ingredients (put them back into inventory)
+            for (String ingredient : usedIngredients) {
+                returnIngredient(ingredient);
+            }
+        }
+    
         return success;
     }
+    
+    public void returnIngredient(String ingredient) {
+        AtomicInteger count = stock.get(ingredient);
+        if (count != null) {
+            count.incrementAndGet();  // Add back the ingredient
+        }
+    }    
 
-    public synchronized boolean useIngredient(String ingredient) {
+    public boolean useIngredient(String ingredient) {
         AtomicInteger count = stock.get(ingredient);
         if (count != null && count.get() > 0) {
             try {
