@@ -1,4 +1,4 @@
-package apd.proj;
+package apd.proj.fixed;
 
 import java.util.ArrayList;
 import java.util.HashMap;

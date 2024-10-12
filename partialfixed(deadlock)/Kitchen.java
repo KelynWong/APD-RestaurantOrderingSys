@@ -1,4 +1,4 @@
-package apd.proj;
+package apd.proj.partialfixed;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;

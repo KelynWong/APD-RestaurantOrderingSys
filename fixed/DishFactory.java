@@ -1,4 +1,4 @@
-package apd.proj;
+package apd.proj.fixed;
 
 public class DishFactory {
     public static Dish createDish(String dishType) {

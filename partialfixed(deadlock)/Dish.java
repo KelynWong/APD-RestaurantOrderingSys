@@ -1,4 +1,4 @@
-package apd.proj;
+package apd.proj.partialfixed;
 
 import java.util.Map;
 

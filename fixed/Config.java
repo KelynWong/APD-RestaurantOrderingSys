@@ -1,4 +1,4 @@
-package apd.proj;
+package apd.proj.fixed;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

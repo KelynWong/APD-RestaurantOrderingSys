@@ -1,4 +1,4 @@
-package apd.proj;
+package apd.proj.partialfixed;
 
 public class Omelette extends AbstractDish {
     public Omelette() {

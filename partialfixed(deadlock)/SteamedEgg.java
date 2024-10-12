@@ -1,4 +1,4 @@
-package apd.proj;
+package apd.proj.partialfixed;
 
 public class SteamedEgg extends AbstractDish {
     public SteamedEgg() {

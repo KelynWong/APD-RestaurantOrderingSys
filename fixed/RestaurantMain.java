@@ -1,4 +1,4 @@
-package apd.proj;
+package apd.proj.fixed;
 
 import java.util.Random;
 import java.util.concurrent.ExecutorService;

@@ -1,4 +1,4 @@
-package apd.proj;
+package apd.proj.fixed;
 
 public class Omelette extends AbstractDish {
     public Omelette() {

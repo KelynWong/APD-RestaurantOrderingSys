@@ -1,4 +1,4 @@
-package apd.proj;
+package apd.proj.notfixed;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,13 +54,12 @@ public class Kitchen {
     
     public void addDishToMake(Dish dish) {
         // try {
-        //     Thread.sleep(1);  
+        //     Thread.sleep(30);  // Introduce delay to increase race condition likelihood
         // } catch (InterruptedException e) {
         //     Thread.currentThread().interrupt();
         // }
         dishesToMake.add(dish);  
         totalDishesCount.incrementAndGet();
-
         incrementDishCount(dish, toMakeDishCountMap);
         allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
     }
@@ -79,31 +78,25 @@ public class Kitchen {
     }
 
     public void markDishAsMade(Dish dish) {
-        // synchronized (madeDishes) {
-            dishesToMake.remove(dish);
-            madeDishes.add(dish);
-            incrementDishCount(dish, madeDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        // }
+        dishesToMake.remove(dish);
+        madeDishes.add(dish);
+        incrementDishCount(dish, madeDishCountMap);
+        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
     }
 
     public void markDishAsAbandoned(Dish dish) {
-        // synchronized (abandonedDishes) {
-            dishesToMake.remove(dish);
-            abandonedDishes.add(dish);
-            totalAbandonedDishesCount.incrementAndGet();
-            incrementDishCount(dish, abandonedDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        // }
+        dishesToMake.remove(dish);
+        abandonedDishes.add(dish);
+        totalAbandonedDishesCount.incrementAndGet();
+        incrementDishCount(dish, abandonedDishCountMap);
+        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
     }
 
     public void markDishAsServed(Dish dish) {
-        // synchronized (servedDishes) {
-            madeDishes.remove(dish);
-            servedDishes.add(dish);
-            incrementDishCount(dish, servedDishCountMap);
-            allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
-        // }
+        madeDishes.remove(dish);
+        servedDishes.add(dish);
+        incrementDishCount(dish, servedDishCountMap);
+        allDishTypes.add(dish.getClass().getSimpleName());  // Track the dish type
     }
 
     public Dish getMadeDishToServe() {
@@ -150,7 +143,7 @@ public class Kitchen {
             System.out.println(" - " + dishType + ": " + count);
         }
     }
-
+    
     private int getTotalDishCount(Map<String, AtomicInteger> dishCountMap) {
         return dishCountMap.values().stream().mapToInt(AtomicInteger::get).sum();
     }
