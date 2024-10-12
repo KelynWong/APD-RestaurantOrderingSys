@@ -1,6 +1,7 @@
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -10,15 +11,15 @@ class Inventory {
     // Singleton instance
     private static Inventory instance;
 
-    private Map<String, Integer> stock;
+    private Map<String, AtomicInteger> stock;
     private Map<String, Lock> locks;
     private Random random = new Random();
 
     private int sleepTime;
 
     private Inventory() {
-        stock = new HashMap<>();
-        locks = new HashMap<>();
+        stock = new ConcurrentHashMap<>();
+        locks = new ConcurrentHashMap<>();
 
         // Load configuration values
         Config config = Config.getInstance();
@@ -33,16 +34,16 @@ class Inventory {
         return instance;
     }
 
-    public void addIngredient(String ingredient, int quantity) {
-        stock.put(ingredient, stock.getOrDefault(ingredient, 0) + quantity);
-        locks.putIfAbsent(ingredient, new ReentrantLock());  // Create a lock for each ingredient
+    public synchronized void addIngredient(String ingredient, int quantity) {
+        stock.computeIfAbsent(ingredient, k -> new AtomicInteger(0)).addAndGet(quantity);
+        locks.putIfAbsent(ingredient, new ReentrantLock());
     }
 
-    public boolean hasIngredient(String ingredient) {
-        return stock.getOrDefault(ingredient, 0) > 0;
+    public synchronized boolean hasIngredient(String ingredient) {
+        return stock.getOrDefault(ingredient, new AtomicInteger(0)).get() > 0;
     }
 
-    public boolean useIngredientsForDish(Dish dish) {
+    public synchronized boolean useIngredientsForDish(Dish dish) {
         boolean success = true;
 
         // Get ingredients and shuffle them to randomize the order of locking
@@ -93,20 +94,18 @@ class Inventory {
         return success;
     }
 
-    public boolean useIngredient(String ingredient) {
-        if (hasIngredient(ingredient)) {
-            int count = stock.get(ingredient);
+    public synchronized boolean useIngredient(String ingredient) {
+        AtomicInteger count = stock.get(ingredient);
+        if (count != null && count.get() > 0) {
             try {
                 Thread.sleep(sleepTime); 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            count--;  // Decrement the stock count
-            stock.put(ingredient, count);
+            count.decrementAndGet();
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public void displayInventory() {
