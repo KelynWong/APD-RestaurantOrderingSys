@@ -63,7 +63,11 @@ public class Inventory {
                     // Acquire the lock on the ingredient
                     System.out.println(Thread.currentThread().getName() + " locking " + ingredient);
                     lock.lock();
-                    Thread.sleep(sleepTime);  
+                    try {
+                        Thread.sleep(sleepTime); 
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    } 
                     
                     // Try to use the ingredient
                     if (!useIngredient(ingredient)) {
@@ -73,13 +77,14 @@ public class Inventory {
                         // If successful, add the ingredient to the used list
                         usedIngredients.add(ingredient);
                     }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    success = false;
-                    break;
                 } finally {
                     // Unlock the ingredient in the finally block
                     System.out.println(Thread.currentThread().getName() + " unlocking " + ingredient);
+                    try {
+                        Thread.sleep(sleepTime); 
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                     lock.unlock();
                 }
             }
