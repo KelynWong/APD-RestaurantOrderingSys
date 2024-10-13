@@ -16,9 +16,10 @@ To fix race conditions as well as prevent deadlocks, reentrantlocks and lock ord
 ## Running the program
 1. cd into either fixed, notfixed(race condition) or partialfixed(deadlock) folder
 2. Compile using `javac -d . *.java`
-3. (optional) Make configuration changes in config.txt
+3. (optional - refer to configuration guide) Make configuration changes in config.txt
 4. Run using `java apd.proj.<notfixed or partialfixed or fixed>.RestaurantMain`
 
+## Configuration guide
 ### Order Configuration
 ---
 **Format (note that each configuration is one line of the text  file):**  
