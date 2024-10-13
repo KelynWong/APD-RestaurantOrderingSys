@@ -60,6 +60,7 @@ public class Kitchen {
         return instance;
     }
     
+    // critical section
     public void addDishToMake(Dish dish) {
         toMakeLock.lock();  // Use toMakeLock for dishesToMake
         try {
@@ -72,6 +73,7 @@ public class Kitchen {
         }
     }    
 
+    // critical section
     public Dish getDishToMake() {
         toMakeLock.lock();  // Use toMakeLock for dishesToMake
         try {
@@ -90,6 +92,7 @@ public class Kitchen {
         }
     }    
 
+    // critical section
     public void markDishAsMade(Dish dish) {
         toMakeLock.lock();
         madeLock.lock();
@@ -111,6 +114,7 @@ public class Kitchen {
         }
     }
 
+    // critical section
     public void markDishAsAbandoned(Dish dish) {
         toMakeLock.lock();
         abandonedLock.lock();
@@ -133,6 +137,7 @@ public class Kitchen {
         }
     }    
 
+    // critical section
     public void markDishAsServed(Dish dish) {
         madeLock.lock();   // Lock the madeDishes list
         servedLock.lock(); // Lock the servedDishes list
@@ -154,6 +159,7 @@ public class Kitchen {
         }
     }    
 
+    // critical section
     public Dish getMadeDishToServe() {
         madeLock.lock();
         try {
