@@ -108,14 +108,14 @@ This setting controls whether the inventory has enough ingredients to fulfill al
 Feel free to play around and changing the values of the configuration values to observe how the behavior of waiters, chefs, kitchen, and inventory in the restaurant simulation changes :)
 
 
-##  Scenarios and their Observations(corresponding to folders in project directory)
-### 1. `notfixed(racecondition)`
-Observation 1
-Expected number of to make dishes (rare chance of this happening), made dishes, served dishes **do not** tally with actual number of to make dishes, made dishes and served dishes.
-Observation 2
+##  Scenarios and their Observations (corresponding to folders in project directory)
+### 1. `notfixed(race condition)`
+**Observation 1:** Expected number of to make dishes (rare chance of this happening), made dishes, served dishes **do not** tally with actual number of to make dishes, made dishes and served dishes.
+
+**Observation 2:**
 Expected inventory of ingredients of butter, salt, egg, milk and water **does not** match with actual inventory of ingredients of butter, salt, egg, milk and water.
-Observation 3
-Looking at the outputs when waiter and chef is preparing and serving dishes, multiple different chefs can be seen preparing the same dish order as well as multiple different waiters can be seen serving the same dish order.
+
+**Observation 3:** Looking at the outputs when waiter and chef is preparing and serving dishes, multiple different chefs can be seen preparing the same dish order as well as multiple different waiters can be seen serving the same dish order.
 E.g. Multiple different chef preparing same dish orders
 ```txt
 Chef 5 is preparing: SteamedEgg (item: 1994625982)
@@ -133,11 +133,10 @@ Waiter 1 served: SteamedEgg (item: 674644657)
 Waiter 6 served: SteamedEgg (item: 250533076)
 Waiter 4 served: SteamedEgg (item: 250533076)
 ```
-Observation 4
-Abandoned dishes are most of the time 0 regardless of configuration being MAKE_INVENTORY_LIMITED 0 or 1. This is because the race conditions in dishes and ingredients will often cause missing dishes and 
+**Observation 4:**
+Abandoned dishes are most of the time 0 regardless of configuration being MAKE_INVENTORY_LIMITED 0 or 1. Race conditions of dish arraylists and modification in inventory of ingredients may lead to underutilization of ingredients so no dish is abandoned. 
 
-
-output e.g.
+program output e.g.
 ```txt
 Parsed config: SteamedEgg = 10
 Parsed config: Omelette = 5
@@ -210,10 +209,9 @@ Expected Inventory: {butter=0, salt=0, egg=0, milk=0, water=0}
 ```
 
 ### 2.`partialfixed(deadlock)
-Obervation 1
-The program hangs forever and no output of actual and expected inventory of ingredients and kitchen lists is observed.
-Observation 2
-Multiple different ingredients are being locked in random order by multiple chefs while preparing dishes and does not release the lock on ingredients until they have gotten all the locks of all the ingredients required for the dish which causes a circular dependency
+**Obervation 1:** The program hangs forever and no output of actual and expected inventory of ingredients and kitchen lists is observed.
+
+**Observation 2:** Multiple different ingredients are being locked in random order by multiple chefs while preparing dishes and does not release the lock on ingredients until they have gotten all the locks of all the ingredients required for the dish which causes a circular dependency
 
 program output e.g.
 ```txt
@@ -262,14 +260,11 @@ pool-1-thread-24 locking egg
 ```
 
 ### 3.`fixed
-Observation 1
-Expected number of to make dishes (rare chance of this happening), made dishes, served dishes **do** tally with actual number of to make dishes, made dishes and served dishes.
-Observation 2
-Expected inventory of ingredients of butter, salt, egg, milk and water **does** match with actual inventory of ingredients of butter, salt, egg, milk and water.
-Observation 3
-Looking at the outputs when waiter and chef is preparing and serving dishes, multiple different chefs **does not** prepare the same dish order and multiple different waiters **does not** serve the same dish order.
-Observation 4 
+**Observation 1:** Expected number of to make dishes (rare chance of this happening), made dishes, served dishes **do** tally with actual number of to make dishes, made dishes and served dishes.
 
+**Observation 2:** Expected inventory of ingredients of butter, salt, egg, milk and water **does** match with actual inventory of ingredients of butter, salt, egg, milk and water.
+
+**Observation 3:** Looking at the outputs when waiter and chef is preparing and serving dishes, multiple different chefs **does not** prepare the same dish order and multiple different waiters **does not** serve the same dish order.
 
 program output e.g.
 ```txt
@@ -346,8 +341,7 @@ Expected Inventory: {butter=0, salt=0, egg=0, milk=0, water=0}
 ### Edge case: Abandoned dishes
 In the fixed folder, change `config.txt` MAKE_INVENTORY_LIMITED value to 1.
 
-Observation
-Chefs abandon dishes when the inventory contains insufficient ingredients for the dishes.
+**Observation:** Chefs abandon dishes when the inventory contains insufficient ingredients for the dishes
 
 program output e.g
 ```txt
