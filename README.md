@@ -36,7 +36,7 @@ SteamedEgg 10
 Omelette 5
 ```
 
-Each waiter will submit **10 orders of SteamedEgg** and **5 orders of Omelette** to the kitchen for the chefs to prepare.
+Each waiter will submit **10 dishes of SteamedEgg** and **5 dishes of Omelette** to the kitchen for the chefs to prepare.
 
 ### General Configurations
 ---
