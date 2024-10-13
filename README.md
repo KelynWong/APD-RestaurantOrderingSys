@@ -266,6 +266,8 @@ pool-1-thread-24 locking egg
 
 **Observation 3:** Looking at the outputs when waiter and chef is preparing and serving dishes, multiple different chefs **does not** prepare the same dish order and multiple different waiters **does not** serve the same dish order.
 
+Note: MAKE_INVENTORY_LIMITED in config.txt is 0.
+
 program output e.g.
 ```txt
 Parsed config: SteamedEgg = 10
