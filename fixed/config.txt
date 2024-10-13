@@ -20,4 +20,4 @@ NUMBER_OF_CHEFS 10
 NUMBER_OF_WAITERS 10
 
 # either 1 or 0: 0 = exact amount of ingredients, 1 = not enough ingredients for the dishes
-MAKE_INVENTORY_LIMITED 1
+MAKE_INVENTORY_LIMITED 0
