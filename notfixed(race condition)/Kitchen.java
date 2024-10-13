@@ -53,11 +53,6 @@ public class Kitchen {
     }
     
     public void addDishToMake(Dish dish) {
-        // try {
-        //     Thread.sleep(30);  // Introduce delay to increase race condition likelihood
-        // } catch (InterruptedException e) {
-        //     Thread.currentThread().interrupt();
-        // }
         dishesToMake.add(dish);  
         totalDishesCount.incrementAndGet();
         incrementDishCount(dish, toMakeDishCountMap);
